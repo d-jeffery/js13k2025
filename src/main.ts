@@ -39,6 +39,9 @@ function gameRenderPost() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+LittleJS.glSetAntialias(false)
+
 // Startup LittleJS Engine
 LittleJS.engineInit(
     gameInit,
