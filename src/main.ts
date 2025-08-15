@@ -7,21 +7,24 @@
 
 'use strict';
 
-import * as LittleJS from 'littlejsengine';
-import {IntroScene, Scene} from "./scene.ts";
+import {engineInit, glSetAntialias} from 'littlejsengine';
+import {GameScene, IntroScene, Scene} from "./scene.ts";
 
 let currentScene: Scene;
 
 ///////////////////////////////////////////////////////////////////////////////
 function gameInit() {
-    console.log("Hello LittleJS!");
-
     currentScene = new IntroScene()
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 function gameUpdate() {
     currentScene.update()
+
+    if (currentScene.isFinished()) {
+        // Switch to the next scene
+        currentScene = new GameScene(); // Replace with your next scene
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -40,10 +43,10 @@ function gameRenderPost() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-LittleJS.glSetAntialias(false)
+glSetAntialias(false)
 
 // Startup LittleJS Engine
-LittleJS.engineInit(
+engineInit(
     gameInit,
     gameUpdate,
     gameUpdatePost,
