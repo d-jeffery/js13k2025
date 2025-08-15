@@ -7,7 +7,7 @@
 
 'use strict';
 
-import {engineInit, glSetAntialias} from 'littlejsengine';
+import {engineInit, glSetAntialias, setCanvasMaxSize, setGravity, vec2} from 'littlejsengine';
 import {GameScene, IntroScene, Scene} from "./scene.ts";
 
 let currentScene: Scene;
@@ -41,9 +41,10 @@ function gameRender() {
 function gameRenderPost() {
 }
 
-///////////////////////////////////////////////////////////////////////////////
-
-glSetAntialias(false)
+setCanvasMaxSize(vec2(720, 1280));
+setGravity(-0.01)
+// setTouchGamepadEnable(true)
+glSetAntialias( false)
 
 // Startup LittleJS Engine
 engineInit(

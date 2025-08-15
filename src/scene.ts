@@ -6,9 +6,10 @@ import {
     drawTile,
     vec2,
     textureInfos,
-    mouseIsDown,
+    mouseIsDown, EngineObject, type Vector2, setCameraScale,
 } from "littlejsengine";
 import {drawGradientCircle} from "./draw.ts";
+import {Cat} from "./sprites.ts";
 
 export abstract class Scene {
     public abstract update(): void
@@ -50,12 +51,12 @@ export class IntroScene extends Scene {
 
         // @ts-expect-error - textureInfos is any
         const catTexture = new TileInfo(vec2(0,0), vec2(catSrcSize, catSrcSize), textureInfos['black_cat.png']);
-        drawTile(vec2(0, - this.offsetY), vec2(4, 4), catTexture);
+        drawTile(vec2(0, - this.offsetY), vec2(5, 5), catTexture);
 
         // const font = new FontImage(this.fontImg, vec2(16, 16), vec2(0, 0));
         const font = new FontImage
-        font.drawText("Miss Fortune", vec2(0, 5), 0.2, true)
-        font.drawText("Click to Play", vec2(0, -5), 0.1, true)
+        font.drawText("Miss\nFortune", vec2(0, 7), 0.2, true)
+        font.drawText("Click to\nPlay", vec2(0, -5), 0.1, true)
     }
 
     public isFinished(): boolean {
@@ -64,17 +65,37 @@ export class IntroScene extends Scene {
 }
 
 export class GameScene extends Scene {
+    private cat: Cat
+    protected finished: boolean;
+
     public constructor() {
         super();
+
+        new Ground(vec2(0,-10), vec2(16, 0.5));
+
+
+        this.cat = new Cat();
+        this.finished = false;
+
+
+        setCameraScale(50)
     }
     public update(): void {
-        throw new Error("Method not implemented.");
+        this.cat.update()
     }
     public draw(): void {
-        throw new Error("Method not implemented.");
+        this.cat.render()
     }
     public isFinished(): boolean {
-        throw new Error("Method not implemented.");
+        return this.finished
     }
 
+}
+
+class Ground extends EngineObject {
+    constructor(pos: Vector2, size: Vector2) {
+        super(pos, size);
+        this.setCollision(); // Enable collision for the ground
+        this.mass = 0;      // Make the ground static (immovable)
+    }
 }
