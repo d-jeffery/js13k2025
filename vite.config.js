@@ -1,26 +1,19 @@
 import { defineConfig } from 'vite'
 // import { analyzer } from 'vite-bundle-analyzer'
-import vitePluginRoadroller from './vite-plugin-roadroller.js'
+import {
+    advzipPlugin,
+    ectPlugin,
+    defaultViteBuildOptions,
+    roadrollerPlugin,
+} from "js13k-vite-plugins";
 
 export default defineConfig({
     plugins: [
         // analyzer(),
-        vitePluginRoadroller()
+        roadrollerPlugin(),
+        ectPlugin(),
+        advzipPlugin()
     ],
     base: "./",
-    build: {
-        minify: 'terser',
-        terserOptions: {
-            compress: {
-                drop_console: true,
-                drop_debugger: true,
-            },
-            format: {
-                comments: false
-            },
-            mangle: {
-                reserved: []
-            }
-        }
-    }
+    build: defaultViteBuildOptions
 })

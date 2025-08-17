@@ -12,6 +12,8 @@
   "devDependencies": {
     "@eslint/js": "^9.33.0",
     "eslint": "^9.33.0",
+    "js13k-vite-plugins": "^0.4.0",
+    "minimatch": "^10.0.3",
     "roadroller": "^2.1.0",
     "terser": "^5.43.1",
     "typescript": "^5.9.2",
