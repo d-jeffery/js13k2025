@@ -1,9 +1,11 @@
 import { defineConfig } from 'vite'
-import { analyzer } from 'vite-bundle-analyzer'
+// import { analyzer } from 'vite-bundle-analyzer'
+import vitePluginRoadroller from './vite-plugin-roadroller.js'
 
 export default defineConfig({
     plugins: [
-        analyzer()
+        // analyzer(),
+        vitePluginRoadroller()
     ],
     base: "./",
     build: {
