@@ -1,4 +1,18 @@
-import {EngineObject, keyIsDown, textureInfos, TileInfo, vec2} from "littlejsengine";
+import {
+    EngineObject, gamepadStick, gamepadWasPressed, isUsingGamepad, keyDirection,
+    keyWasPressed,
+    textureInfos,
+    TileInfo,
+    vec2,
+} from "littlejsengine";
+
+
+export class Building extends EngineObject {
+    public constructor() {
+        super()
+
+    }
+}
 
 export class Cat extends EngineObject {
     private speed: number;
@@ -19,13 +33,18 @@ export class Cat extends EngineObject {
     public update(): void {
         super.update()
 
-        if (keyIsDown('ArrowLeft') || keyIsDown('a')) {
-            this.velocity = vec2(-this.speed, this.velocity.y);
-        } else if (keyIsDown('ArrowRight') || keyIsDown('d')) {
-            this.velocity = vec2(this.speed, this.velocity.y);
+        if (this.groundObject) {
+            this.canDoubleJump = true;
         }
 
-        if (keyIsDown('ArrowUp') || keyIsDown('w')) {
+        const moveInput = isUsingGamepad ? gamepadStick(0) : keyDirection()
+        if (moveInput.x !== 0) {
+            this.velocity = vec2(moveInput.x * this.speed, this.velocity.y);
+        } else {
+            this.velocity = vec2(0, this.velocity.y);
+        }
+
+        if (gamepadWasPressed(0) || keyWasPressed('ArrowUp') || keyWasPressed('w')) {
             if (this.groundObject) {
                 this.velocity = vec2(this.velocity.x, this.jumpSpeed);
                 this.canDoubleJump = true;
@@ -34,6 +53,7 @@ export class Cat extends EngineObject {
                 this.canDoubleJump = false;
             }
         }
+
     }
     public render() {
         super.render();

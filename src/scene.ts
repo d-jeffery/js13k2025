@@ -6,7 +6,7 @@ import {
     drawTile,
     vec2,
     textureInfos,
-    mouseIsDown, EngineObject, type Vector2, setCameraScale,
+    mouseIsDown, EngineObject, type Vector2, setCameraScale, Timer, setCameraPos, drawRect, drawLine,
 } from "littlejsengine";
 import {drawGradientCircle} from "./draw.ts";
 import {Cat} from "./sprites.ts";
@@ -21,10 +21,6 @@ export class IntroScene extends Scene {
     private catImg: HTMLImageElement = new Image(8,8);
     //private fontImg: HTMLImageElement = new Image();
     private offsetY: number;
-    /**
-     * Indicates if the scene is finished.
-     * If true, the game will switch to the next scene.
-     */
     protected finished: boolean;
 
     public constructor() {
@@ -66,15 +62,32 @@ export class IntroScene extends Scene {
 
 export class GameScene extends Scene {
     private cat: Cat
+    private countDown: Timer;
+    private cameraOffset: number;
     protected finished: boolean;
+
 
     public constructor() {
         super();
 
         new Ground(vec2(0,-10), vec2(16, 0.5));
 
+        new WindowSill(vec2(-5, -6), vec2(2.5, 0.5));
+        new WindowSill(vec2(0, -6), vec2(2.5, 0.5));
+        new WindowSill(vec2(5, -6), vec2(2.5, 0.5));
+
+        new WindowSill(vec2(-5, 0), vec2(2.5, 0.5));
+        new WindowSill(vec2(0, 0), vec2(2.5, 0.5));
+        new WindowSill(vec2(5, 0), vec2(2.5, 0.5));
+
+        new WindowSill(vec2(-5, 6), vec2(2.5, 0.5));
+        new WindowSill(vec2(0, 6), vec2(2.5, 0.5));
+        new WindowSill(vec2(5, 6), vec2(2.5, 0.5));
+
 
         this.cat = new Cat();
+        this.countDown = new Timer(5);
+        this.cameraOffset = 0
         this.finished = false;
 
 
@@ -82,6 +95,11 @@ export class GameScene extends Scene {
     }
     public update(): void {
         this.cat.update()
+
+        if (this.countDown.elapsed()) {
+            this.cameraOffset -= 0.01
+            setCameraPos(vec2(0,-this.cameraOffset))
+        }
     }
     public draw(): void {
         this.cat.render()
@@ -97,5 +115,27 @@ class Ground extends EngineObject {
         super(pos, size);
         this.setCollision(); // Enable collision for the ground
         this.mass = 0;      // Make the ground static (immovable)
+    }
+}
+
+class WindowSill extends EngineObject {
+    constructor(pos: Vector2, size: Vector2) {
+        super(pos, size);
+        this.setCollision(); // Enable collision for the ground
+        this.mass = 0;      // Make the ground static (immovable)
+    }
+
+    public render() {
+        super.render();
+
+        drawRect(
+            vec2(this.pos.x, this.pos.y+1.5),
+            vec2(this.size.x, this.size.y-3),
+            new Color(0.5, 0.5, 0.5, 1));
+
+        drawLine(
+            vec2(this.pos.x - 1.5, this.pos.y+3),
+            vec2(this.pos.x + 1.5, this.pos.y+3))
+
     }
 }
