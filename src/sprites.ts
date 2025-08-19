@@ -62,7 +62,17 @@ export class Cat extends EngineObject {
     }
 }
 
+class Plant extends EngineObject {
+    constructor(pos: Vector2) {
+        super(pos, vec2(1,1));
+        this.setCollision(); // Enable collision for the plant
+        this.mass = 0;      // Make the plant static (immovable)
 
+        // @ts-expect-error - textureInfos is any
+        this.tileInfo = new TileInfo(vec2(16, 0), vec2(16,16), textureInfos['black_cat.png']);
+
+    }
+}
 
 
 export class Ground extends EngineObject {
@@ -85,6 +95,12 @@ export class WindowSill extends EngineObject {
         this.mass = 0;
         this.type = Math.random() * 2 | WINDOW_TYPE_OPEN;
 
+
+        switch (Math.round(Math.random() * 2)) {
+            case 0:
+                new Plant(vec2(pos.x, pos.y + 0.75))
+                break
+        }
 
     }
 
