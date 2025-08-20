@@ -1,4 +1,5 @@
 import {
+    cameraPos,
     Color, drawLine,
     drawRect,
     EngineObject, gamepadStick, gamepadWasPressed, gamepadWasReleased, isUsingGamepad, keyDirection,
@@ -62,18 +63,43 @@ export class Cat extends EngineObject {
     }
 }
 
-class Plant extends EngineObject {
+class Destructible extends EngineObject {
     constructor(pos: Vector2) {
-        super(pos, vec2(1,1));
-        this.setCollision(); // Enable collision for the plant
-        this.mass = 0;      // Make the plant static (immovable)
+        super(pos, vec2(1, 1));
+        this.setCollision()
+        this.mass = 0
+    }
 
-        // @ts-expect-error - textureInfos is any
-        this.tileInfo = new TileInfo(vec2(16, 0), vec2(16,16), textureInfos['black_cat.png']);
+    public update() {
+        super.update();
 
+        if (this.pos.y < -10) {
+            this.destroy()
+        }
+    }
+
+    public collideWithObject(object: EngineObject): boolean {
+        if (object instanceof Cat) {
+            this.setCollision(false)
+            this.mass = 1
+        }
+        return false;
     }
 }
 
+class Plant extends Destructible {
+    constructor(pos: Vector2) {
+        super(pos);
+        this.tileInfo = new TileInfo(vec2(16, 0), vec2(16, 16), textureInfos['black_cat.png']);
+    }
+}
+
+class Pie extends Destructible {
+    constructor(pos: Vector2) {
+        super(pos);
+        this.tileInfo = new TileInfo(vec2(32, 0), vec2(16, 16), textureInfos['black_cat.png']);
+    }
+}
 
 export class Ground extends EngineObject {
     constructor(pos: Vector2, size: Vector2) {
@@ -95,13 +121,15 @@ export class WindowSill extends EngineObject {
         this.mass = 0;
         this.type = Math.random() * 2 | WINDOW_TYPE_OPEN;
 
-
-        switch (Math.round(Math.random() * 2)) {
+        // Create a plant on the window sill at a random cadence
+        switch (Math.floor(Math.random() * 3)) {
             case 0:
                 new Plant(vec2(pos.x, pos.y + 0.75))
-                break
+                break;
+            case 1:
+                new Pie(vec2(pos.x, pos.y + 0.75))
+                break;
         }
-
     }
 
     public render() {
@@ -110,26 +138,26 @@ export class WindowSill extends EngineObject {
         switch (this.type) {
             case WINDOW_TYPE_CLOSE:
                 drawRect(
-                    vec2(this.pos.x, this.pos.y+1.5),
-                    vec2(this.size.x, this.size.y-3),
+                    vec2(this.pos.x, this.pos.y + 1.5),
+                    vec2(this.size.x, this.size.y - 3),
                     new Color(0.25, 0.25, 0.25, 1));
                 drawLine(
-                    vec2(this.pos.x - 1.25, this.pos.y+1.5),
-                    vec2(this.pos.x + 1.25, this.pos.y+1.5))
+                    vec2(this.pos.x - 1.25, this.pos.y + 1.5),
+                    vec2(this.pos.x + 1.25, this.pos.y + 1.5));
                 drawLine(
-                    vec2(this.pos.x, this.pos.y+2.75),
-                    vec2(this.pos.x, this.pos.y))
+                    vec2(this.pos.x, this.pos.y + 2.75),
+                    vec2(this.pos.x, this.pos.y));
                 break;
             default:
                 drawRect(
-                    vec2(this.pos.x, this.pos.y+1.5),
-                    vec2(this.size.x, this.size.y-3),
+                    vec2(this.pos.x, this.pos.y + 1.5),
+                    vec2(this.size.x, this.size.y - 3),
                     new Color(0.5, 0.5, 0.5, 1));
         }
 
         drawLine(
-            vec2(this.pos.x - 1.5, this.pos.y+3),
-            vec2(this.pos.x + 1.5, this.pos.y+3))
+            vec2(this.pos.x - 1.5, this.pos.y + 3),
+            vec2(this.pos.x + 1.5, this.pos.y + 3))
 
     }
 }

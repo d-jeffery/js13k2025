@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "lint": "eslint ./src/**/*.ts --fix"
+    "lint": "eslint src/**/*.ts --fix"
   },
   "devDependencies": {
     "@eslint/js": "^9.33.0",
