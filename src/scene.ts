@@ -6,7 +6,7 @@ import {
     drawTile,
     vec2,
     textureInfos,
-    mouseIsDown, setCameraScale, Timer, setCameraPos,
+    mouseIsDown, setCameraScale, Timer, setCameraPos, drawText, fontDefault, overlayContext,
 } from "littlejsengine";
 import {drawGradientCircle} from "./draw.ts";
 import {Cat, Ground, WindowSill} from "./sprites.ts";
@@ -42,6 +42,9 @@ export class IntroScene extends Scene {
     }
 
     public draw(): void {
+
+
+
         drawGradientCircle(vec2(0, -this.offsetY), 4, new Color(0, 0, 0, 0.5), new Color(1, 1, 1, 1), 30);
         // drawCircle(new Vector2(0, -0.5 - this.offsetY), 2.8, new Color(1, 1, 1, 1))
 
@@ -68,11 +71,12 @@ export class GameScene extends Scene {
     private cameraOffset: number;
     protected finished: boolean;
 
-
     public constructor() {
         super();
 
-        new Ground(vec2(0, -10), vec2(16, 0.5));
+        new Ground(vec2(0, -8.5), vec2(16, 0.5));
+
+        this.cat = new Cat(vec2(0, -7.5));
 
         for (let i = -6; i <= 18; i += 6) {
             new WindowSill(vec2(-5, i), vec2(2.5, 0.5));
@@ -80,7 +84,6 @@ export class GameScene extends Scene {
             new WindowSill(vec2(5, i), vec2(2.5, 0.5));
         }
 
-        this.cat = new Cat(vec2(0, -9));
         this.countDown = new Timer(5);
         this.cameraOffset = 0
         this.finished = false;
@@ -98,7 +101,7 @@ export class GameScene extends Scene {
     }
 
     public draw(): void {
-        this.cat.render()
+        drawText("Score: " + this.cat.getScore(), vec2(0, 12 - this.cameraOffset), 1, new Color(1, 1, 0, 1), 0.2, new Color(0,0,0,1), 'center', fontDefault, undefined, overlayContext);
     }
 
     public isFinished(): boolean {

@@ -1,31 +1,47 @@
 import {
-    cameraPos,
     Color, drawLine,
     drawRect,
     EngineObject, gamepadStick, gamepadWasPressed, gamepadWasReleased, isUsingGamepad, keyDirection,
     keyWasPressed, keyWasReleased,
     textureInfos,
     TileInfo,
-    vec2, type Vector2,
+    vec2, type Vector2, worldToScreen
 } from "littlejsengine";
+import {drawCircleSegment} from "./draw.ts";
 
+const BACKGROUND_LAYER = 0;
+const CAT_LAYER = 1;
+const DESTRUCTIBLE_LAYER = 2;
+
+// @ts-ignore
+const spriteSheet = textureInfos['black_cat.png']
 
 export class Cat extends EngineObject {
     private speed: number;
     private jumpSpeed: number
     private canDoubleJump: boolean;
     private jumpCount: number;
+    private score: number;
 
     constructor(pos: Vector2 = vec2(0, 0)) {
         super(pos);
 
-        // @ts-expect-error - textureInfos is any
-        this.tileInfo = new TileInfo(vec2(0, 0), vec2(16, 16), textureInfos['black_cat.png']);
+        this.tileInfo = new TileInfo(vec2(0, 0), vec2(16, 16), spriteSheet);
         this.setCollision()
         this.speed = 0.08; // Set a speed for the cat
         this.jumpSpeed = 0.3
         this.canDoubleJump = false
         this.jumpCount = 0;
+        this.renderOrder = CAT_LAYER;
+        this.score = 0;
+    }
+
+    public addToScore(points: number): void {
+        this.score += points;
+    }
+
+    public getScore(): number {
+        return this.score;
     }
 
     public update(): void {
@@ -68,6 +84,7 @@ class Destructible extends EngineObject {
         super(pos, vec2(1, 1));
         this.setCollision()
         this.mass = 0
+        this.renderOrder = DESTRUCTIBLE_LAYER;
     }
 
     public update() {
@@ -80,8 +97,11 @@ class Destructible extends EngineObject {
 
     public collideWithObject(object: EngineObject): boolean {
         if (object instanceof Cat) {
-            this.setCollision(false)
+            this.setCollision(false, false)
             this.mass = 1
+            this.angleVelocity = (Math.random() - 0.5) * 0.2
+            object.addToScore(10)
+            return true;
         }
         return false;
     }
@@ -90,14 +110,14 @@ class Destructible extends EngineObject {
 class Plant extends Destructible {
     constructor(pos: Vector2) {
         super(pos);
-        this.tileInfo = new TileInfo(vec2(16, 0), vec2(16, 16), textureInfos['black_cat.png']);
+        this.tileInfo = new TileInfo(vec2(16, 0), vec2(16, 16), spriteSheet);
     }
 }
 
 class Pie extends Destructible {
     constructor(pos: Vector2) {
         super(pos);
-        this.tileInfo = new TileInfo(vec2(32, 0), vec2(16, 16), textureInfos['black_cat.png']);
+        this.tileInfo = new TileInfo(vec2(32, 0), vec2(16, 16), spriteSheet);
     }
 }
 
@@ -111,6 +131,7 @@ export class Ground extends EngineObject {
 
 const WINDOW_TYPE_OPEN = 0;
 const WINDOW_TYPE_CLOSE = 1;
+const WINDOW_WITH_DRAPES = 2;
 
 export class WindowSill extends EngineObject {
     private type: number;
@@ -119,7 +140,8 @@ export class WindowSill extends EngineObject {
         super(pos, size);
         this.setCollision();
         this.mass = 0;
-        this.type = Math.random() * 2 | WINDOW_TYPE_OPEN;
+        this.renderOrder = BACKGROUND_LAYER;
+        this.type = Math.floor(Math.random() * 4) | WINDOW_TYPE_OPEN;
 
         // Create a plant on the window sill at a random cadence
         switch (Math.floor(Math.random() * 3)) {
@@ -129,6 +151,7 @@ export class WindowSill extends EngineObject {
             case 1:
                 new Pie(vec2(pos.x, pos.y + 0.75))
                 break;
+            default:
         }
     }
 
@@ -147,6 +170,25 @@ export class WindowSill extends EngineObject {
                 drawLine(
                     vec2(this.pos.x, this.pos.y + 2.75),
                     vec2(this.pos.x, this.pos.y));
+                break;
+            case WINDOW_WITH_DRAPES:
+                drawRect(
+                    vec2(this.pos.x, this.pos.y + 1.5),
+                    vec2(this.size.x, this.size.y - 3),
+                    new Color(0.25, 0.25, 0.25, 1),
+                    0, false);
+                 drawCircleSegment(
+                     worldToScreen(vec2(this.pos.x-1.25, this.pos.y+2.75)),
+                     45,
+                     0,
+                     Math.PI/2,
+                     new Color(0.5, 0.5, 0.5, 1))
+                 drawCircleSegment(
+                     worldToScreen(vec2(this.pos.x+1.25, this.pos.y+2.75)),
+                     45,
+                     Math.PI/2,
+                     Math.PI,
+                     new Color(0.5, 0.5, 0.5, 1))
                 break;
             default:
                 drawRect(
