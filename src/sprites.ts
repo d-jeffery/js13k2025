@@ -34,6 +34,7 @@ export class Cat extends EngineObject {
         this.jumpCount = 0;
         this.renderOrder = CAT_LAYER;
         this.score = 0;
+        this.friction = 0.1;
     }
 
     public addToScore(points: number): void {
@@ -50,12 +51,10 @@ export class Cat extends EngineObject {
         const moveInput = isUsingGamepad ? gamepadStick(0) : keyDirection()
         if (moveInput.x !== 0) {
             this.velocity = vec2(moveInput.x * this.speed, this.velocity.y);
-        } else {
-            this.velocity = vec2(0, this.velocity.y);
         }
 
-        const jumpButtonPressed = gamepadWasPressed(0) || keyWasPressed('ArrowUp') || keyWasPressed('w')
-        const jumpReleased = gamepadWasReleased(0) || keyWasReleased('ArrowUp') || keyWasReleased('w');
+        const jumpButtonPressed = gamepadWasPressed(0) || gamepadWasPressed(1) || gamepadWasPressed(2) || gamepadWasPressed(3) || keyWasPressed('ArrowUp') || keyWasPressed('w')
+        const jumpReleased = gamepadWasReleased(0) || gamepadWasReleased(1) || gamepadWasReleased(2) || gamepadWasReleased(3) || keyWasReleased('ArrowUp') || keyWasReleased('w');
 
         if (this.groundObject) {
             this.jumpCount = 0

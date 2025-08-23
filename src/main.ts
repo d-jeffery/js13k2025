@@ -16,7 +16,8 @@ import {
     vec2
 } from 'littlejsengine';
 import {GameScene, IntroScene, Scene} from "./scene.ts";
-import {initPostProcess} from "./postProcessing.ts";
+// import {initPostProcess} from "./postProcessing.ts";
+
 
 let currentScene: Scene;
 
@@ -24,7 +25,7 @@ let currentScene: Scene;
 function gameInit() {
     currentScene = new IntroScene()
 
-    const code =
+    /*const code =
         "void mainImage(out vec4 fragColor, in vec2 fragCoord)" +
         "{" +
             "vec2 uv = fragCoord.xy / iResolution.xy;" +
@@ -41,7 +42,7 @@ function gameInit() {
             "fragColor = texture(iChannel0, uv) * waterColor;" +
         "}"
 
-    initPostProcess(code, false)
+    initPostProcess(code, false)*/
 }
 
 ///////////////////////////////////////////////////////////////////////////////
