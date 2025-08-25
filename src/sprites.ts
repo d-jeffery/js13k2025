@@ -3,9 +3,7 @@ import {
     drawRect,
     EngineObject, gamepadStick, gamepadWasPressed, gamepadWasReleased, isUsingGamepad, keyDirection,
     keyWasPressed, keyWasReleased,
-    textureInfos,
-    TileInfo,
-    vec2, type Vector2, worldToScreen
+    tile, vec2, type Vector2, worldToScreen
 } from "littlejsengine";
 import {drawCircleSegment} from "./draw.ts";
 
@@ -13,8 +11,6 @@ const BACKGROUND_LAYER = 0;
 const CAT_LAYER = 1;
 const DESTRUCTIBLE_LAYER = 2;
 
-// @ts-ignore
-const spriteSheet = textureInfos['black_cat.png']
 
 export class Cat extends EngineObject {
     private speed: number;
@@ -26,7 +22,7 @@ export class Cat extends EngineObject {
     constructor(pos: Vector2 = vec2(0, 0)) {
         super(pos);
 
-        this.tileInfo = new TileInfo(vec2(0, 0), vec2(16, 16), spriteSheet);
+        this.tileInfo = tile(0, 16)
         this.setCollision()
         this.speed = 0.08; // Set a speed for the cat
         this.jumpSpeed = 0.3
@@ -99,7 +95,7 @@ class Destructible extends EngineObject {
             this.setCollision(false, false)
             this.mass = 1
             this.angleVelocity = (Math.random() - 0.5) * 0.2
-            object.addToScore(10)
+            object.addToScore(1)
             return true;
         }
         return false;
@@ -109,14 +105,14 @@ class Destructible extends EngineObject {
 class Plant extends Destructible {
     constructor(pos: Vector2) {
         super(pos);
-        this.tileInfo = new TileInfo(vec2(16, 0), vec2(16, 16), spriteSheet);
+        this.tileInfo = tile(1, 16);
     }
 }
 
 class Pie extends Destructible {
     constructor(pos: Vector2) {
         super(pos);
-        this.tileInfo = new TileInfo(vec2(32, 0), vec2(16, 16), spriteSheet);
+        this.tileInfo = tile(2, 16)
     }
 }
 

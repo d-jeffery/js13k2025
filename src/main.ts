@@ -9,15 +9,17 @@
 
 import {
     engineInit,
-    glSetAntialias,
+    glSetAntialias, setCameraPos,
     setCanvasFixedSize, setGamepadsEnable,
     setGravity, setTouchGamepadAnalog,
     setTouchGamepadEnable, setTouchGamepadSize,
     vec2
 } from 'littlejsengine';
-import {GameScene, IntroScene, Scene} from "./scene.ts";
+import {EndScene, GameScene, IntroScene, Scene} from "./scene.ts";
 // import {initPostProcess} from "./postProcessing.ts";
 
+const HEIGHT = 1280;
+const WIDTH = 720;
 
 let currentScene: Scene;
 
@@ -49,9 +51,20 @@ function gameInit() {
 function gameUpdate() {
     currentScene.update()
 
-    if (currentScene.isFinished()) {
-        // Switch to the next scene
-        currentScene = new GameScene(); // Replace with your next scene
+    if (!currentScene.isFinished()) {
+        return;
+    }
+
+    currentScene.clean()
+
+    if (currentScene instanceof IntroScene) {
+        currentScene = new GameScene();
+    } else if (currentScene instanceof GameScene) {
+        setCameraPos(vec2(0, 0));
+        currentScene = new EndScene()
+    } else if (currentScene instanceof EndScene) {
+        setCameraPos(vec2(0, 0));
+        currentScene = new GameScene()
     }
 }
 
@@ -68,9 +81,10 @@ function gameRender() {
 
 ///////////////////////////////////////////////////////////////////////////////
 function gameRenderPost() {
+    currentScene.drawOverlay()
 }
 
-setCanvasFixedSize(vec2(720, 1280))
+setCanvasFixedSize(vec2(WIDTH, HEIGHT))
 setGravity(-0.01)
 setTouchGamepadEnable(true)
 setTouchGamepadAnalog(true)

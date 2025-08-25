@@ -2,12 +2,11 @@ import {
     Color,
     FontImage,
     time,
-    TileInfo,
+    tile,
     drawTile,
     vec2,
-    textureInfos,
-    mouseIsDown, setCameraScale, Timer, setCameraPos, drawText, fontDefault, overlayContext, drawLine, drawCircle,
-    drawRect,
+    mouseIsDown, setCameraScale, Timer, setCameraPos, drawText, fontDefault, overlayContext, drawLine,
+    drawRect, mainContext, worldToScreen, engineObjects, lerp,
 } from "littlejsengine";
 import {drawGradientCircle} from "./draw.ts";
 import {Cat, Ground} from "./sprites.ts";
@@ -18,7 +17,11 @@ export abstract class Scene {
 
     public abstract draw(): void
 
+    public abstract drawOverlay(): void;
+
     public abstract isFinished(): boolean
+
+    public abstract clean(): void;
 }
 
 
@@ -43,6 +46,7 @@ fontImage.onload = () => {
 
 
 export class IntroScene extends Scene {
+
     private catImg: HTMLImageElement = new Image(8, 8);
     //private fontImg: HTMLImageElement = new Image();
     private offsetY: number;
@@ -68,11 +72,7 @@ export class IntroScene extends Scene {
         drawGradientCircle(vec2(0, -this.offsetY), 4, new Color(0, 0, 0, 0.5), new Color(1, 1, 1, 1), 30);
         // drawCircle(new Vector2(0, -0.5 - this.offsetY), 2.8, new Color(1, 1, 1, 1))
 
-        const catSrcSize = 16
-
-        // @ts-expect-error - textureInfos is any
-        const catTexture = new TileInfo(vec2(0, 0), vec2(catSrcSize, catSrcSize), textureInfos['black_cat.png']);
-        drawTile(vec2(0, -this.offsetY), vec2(5, 5), catTexture);
+        drawTile(vec2(0, -this.offsetY), vec2(5, 5), tile(0, 16));
 
 
 /*        drawText("Miss\nFortune",
@@ -93,7 +93,9 @@ export class IntroScene extends Scene {
             undefined
             , overlayContext);*/
 
+    }
 
+    public drawOverlay() {
         // const font = new FontImage(this.fontImg, vec2(16, 16), vec2(0, 0));
         const font = new FontImage
         font.drawText("Miss\nFortune", vec2(0, 7), 0.2, true)
@@ -103,12 +105,19 @@ export class IntroScene extends Scene {
     public isFinished(): boolean {
         return this.finished;
     }
+
+    public clean(): void {
+    }
 }
 
 export class GameScene extends Scene {
     private cat: Cat
     private countDown: Timer;
     private cameraOffset: number;
+    private catReached: boolean;
+    // private rain: ParticleEmitter;
+    private lerpFactor: number = 0
+
     protected finished: boolean;
 
     public constructor() {
@@ -120,9 +129,19 @@ export class GameScene extends Scene {
 
         new Building()
 
-        this.countDown = new Timer(8);
+        this.countDown = new Timer(5);
         this.cameraOffset = 0
         this.finished = false;
+        this.catReached = false;
+/*
+        this.rain = new ParticleEmitter(vec2(6, 14), (5/4) * Math.PI, vec2(24,1), 0, 150, 0, tile(3, 16),
+            new Color(0.57, 0.72, 0.82, 0.75),
+            new Color(0.57, 0.72, 0.82, 0.75),
+            new Color(0.77, 0.88, 0.96, 0.5),
+            new Color(0.77, 0.88, 0.96, 0.5),
+            2, 0.15, 0.1, 0.25, 0.05, 1, 1, 1, 3.14, 0.1, 0.25, false, false, true);
+
+        this.rain.renderOrder = 3*/
 
         setCameraScale(50)
     }
@@ -130,21 +149,63 @@ export class GameScene extends Scene {
     public update(): void {
         this.cat.update()
 
-        if (this.countDown.elapsed()) {
+        const catPos = worldToScreen(this.cat.pos)
+
+        // End the scene if the cat goes off the bottom of the screen
+        if (catPos.y > 1160) {
+            this.finished = true;
+        }
+
+        const catPosY = this.cat.pos.y
+        if (catPosY > 7 && !this.catReached) {
+            this.catReached = true
+        }
+
+        if (this.countDown.elapsed() && this.catReached) {
             this.cameraOffset -= 0.01
             setCameraPos(vec2(0, -this.cameraOffset))
+
+            if (this.cat.pos.y + this.cameraOffset > 10) {
+                this.lerpFactor += 0.0001
+                this.cameraOffset = lerp(this.lerpFactor, this.cameraOffset, -this.cat.pos.y + 6)
+            }
+        } else if (this.catReached) {
+            this.countDown.set(0)
         }
+
+        // this.rain.pos = vec2(this.rain.pos.x, 14 - this.cameraOffset)
     }
 
-    public draw(): void {
-        drawLine(vec2(-7,-8.5), vec2(-7,13 - this.cameraOffset) )
-        drawLine(vec2(7,-8.5), vec2(7,13 - this.cameraOffset) )
+    public drawOverlay(): void {
+        // const font = new FontImage(this.fontImg, vec2(16, 16), vec2(0, 0));
+        drawText("Locked out again!",
+            vec2(0, -1.5), 0.8, new Color(1, 1, 0, 1),
+            0.1, new Color(0, 0, 0, 1),
+            'center',
+            fontDefault,
+            undefined
+            , mainContext);
 
-        drawCircle(vec2(0,-5.5), 2, new Color(1,0,0,1))
-        drawRect(vec2(0,-7), vec2(4,3), new Color(1,0,0,1))
+        drawText("I'll need to double jump\njust to reach these windows...",
+            vec2(0, 4.5), 0.8, new Color(1, 1, 0, 1),
+            0.1, new Color(0, 0, 0, 1),
+            'center',
+            fontDefault,
+            undefined
+            , mainContext);
 
-        drawText("Score: " + this.cat.getScore(),
-            vec2(0, 12 - this.cameraOffset),
+        drawText("And if I time it right,\nI can reach the penthouse!",
+            vec2(0, 10.5), 0.8, new Color(1, 1, 0, 1),
+            0.1, new Color(0, 0, 0, 1),
+            'center',
+            fontDefault,
+            undefined
+            , mainContext);
+
+        drawRect(vec2(0, -11 - this.cameraOffset), vec2(15, 5), new Color(0, 0, 0, 1));
+
+        drawText("Smashables: " + this.cat.getScore() + "%",
+            vec2(0, -10 - this.cameraOffset),
             1, new Color(1, 1, 0, 1),
             0.2, new Color(0, 0, 0, 1),
             'center',
@@ -152,18 +213,73 @@ export class GameScene extends Scene {
             undefined,
             overlayContext);
 
-        // const font = new FontImage(this.fontImg, vec2(16, 16), vec2(0, 0));
-        drawText("Locked out again! I'll need to double\njump just to reach these windows",
-            vec2(0, -10), 0.8, new Color(1, 1, 0, 1),
-            0.1, new Color(0, 0, 0, 1),
-            'center',
-            fontDefault,
-            undefined
-        , overlayContext);
+    }
+
+    public draw(): void {
+        // Draw building outline
+        drawLine(vec2(-7,-8.5), vec2(-7,13 - this.cameraOffset) )
+        drawLine(vec2(7,-8.5), vec2(7,13 - this.cameraOffset) )
+
+        // Draw door
+        // drawCircle(vec2(0,-5.5), 2, new Color(0.4,0.22,0.19,1))
+        //drawRect(vec2(0,-7), vec2(4,3), new Color(0.4,0.22,0.19,1))
+
+        drawRect(vec2(0,-5.75), vec2(4,-5.5), new Color(0.4,0.22,0.19,1))
+        drawLine(vec2(-2,-3), vec2(2,-3), 0.1, new Color(1,1,1,1))
+        drawLine(vec2(0,-8.5), vec2(0,-3), 0.1, new Color(1,1,1,1))
+        drawLine(vec2(2,-8.5), vec2(2,-3), 0.1, new Color(1,1,1,1))
+        drawLine(vec2(-2,-8.5), vec2(-2,-3), 0.1, new Color(1,1,1,1))
+
+        drawLine(vec2(0.5,-5), vec2(0.5,-6), 0.1, new Color(1,1,0,1))
+        drawLine(vec2(-0.5,-5), vec2(-0.5,-6), 0.1, new Color(1,1,0,1))
+
     }
 
     public isFinished(): boolean {
         return this.finished
+    }
+
+    public clean(): void {
+        engineObjects.forEach(e => e.destroy())
+    }
+
+}
+
+export class EndScene extends Scene {
+
+    protected finished: boolean;
+
+    constructor() {
+        super();
+
+        this.finished = false
+    }
+
+
+    public draw(): void {
+        drawText("Game Over!\nClick to Restart",
+            vec2(0, 3), 0.8, new Color(1, 1, 0, 1),
+            0.1, new Color(0, 0, 0, 1),
+            'center',
+            fontDefault,
+            undefined
+            , mainContext);
+    }
+
+    public drawOverlay(): void {
+    }
+
+    public isFinished(): boolean {
+        return this.finished;
+    }
+
+    public update(): void {
+        if (mouseIsDown(0)) {
+            this.finished = true;
+        }
+    }
+
+    public clean(): void {
     }
 
 }
