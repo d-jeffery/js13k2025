@@ -1,9 +1,9 @@
 import {
-    Color, drawLine,
+    Color, drawCircle, drawEllipse, drawLine, drawPoly,
     drawRect,
     EngineObject, gamepadStick, gamepadWasPressed, gamepadWasReleased, isUsingGamepad, keyDirection,
     keyWasPressed, keyWasReleased,
-    tile, vec2, type Vector2, worldToScreen
+    tile, Timer, vec2, type Vector2, worldToScreen
 } from "littlejsengine";
 import {drawCircleSegment} from "./draw.ts";
 
@@ -18,6 +18,7 @@ export class Cat extends EngineObject {
     private canDoubleJump: boolean;
     private jumpCount: number;
     private score: number;
+    private lives: number;
 
     constructor(pos: Vector2 = vec2(0, 0)) {
         super(pos);
@@ -31,6 +32,11 @@ export class Cat extends EngineObject {
         this.renderOrder = CAT_LAYER;
         this.score = 0;
         this.friction = 0.1;
+        this.lives = 3;
+    }
+
+    public damage(): void {
+        this.lives -= 1
     }
 
     public addToScore(points: number): void {
@@ -116,6 +122,36 @@ class Pie extends Destructible {
     }
 }
 
+class Flower extends Destructible {
+    constructor(pos: Vector2) {
+        super(pos);
+        this.tileInfo = tile(3, 16);
+    }
+}
+
+class Water extends EngineObject {
+    constructor(pos: Vector2) {
+        super(pos);
+        this.tileInfo = tile(4, 16);
+        this.setCollision()
+        this.mass = 0.1
+        // this.setCollision(false, true)
+    }
+
+    public collideWithObject(object: EngineObject): boolean {
+        if (object instanceof Cat) {
+            object.damage();
+            this.destroy()
+            return true;
+        } else if (object instanceof Ground) {
+            this.destroy()
+            return true;
+        }
+        return false;
+    }
+}
+
+
 export class Ground extends EngineObject {
     constructor(pos: Vector2, size: Vector2) {
         super(pos, size);
@@ -128,6 +164,95 @@ const WINDOW_TYPE_OPEN = 0;
 const WINDOW_TYPE_CLOSE = 1;
 const WINDOW_WITH_DRAPES = 2;
 
+
+const STATE_TIME = 2.5
+const BUCKET_STATE = 2.5
+
+export class WindowSillEnemy extends EngineObject {
+    private bucketTimer: Timer;
+    private stateTimer: Timer;
+    private state: boolean;
+
+    constructor(pos: Vector2, size: Vector2) {
+        super(pos, size);
+        this.setCollision();
+        this.mass = 0;
+        this.renderOrder = BACKGROUND_LAYER;
+        this.bucketTimer = new Timer(BUCKET_STATE)
+        this.stateTimer = new Timer(STATE_TIME)
+        this.state = false
+    }
+
+    public render() {
+        super.render();
+
+        drawRect(
+            vec2(this.pos.x, this.pos.y + 1.5),
+            vec2(this.size.x, this.size.y - 3),
+            new Color(1, 1, 0.38, 1), 0 , false);
+
+        drawEllipse(vec2(this.pos.x, this.pos.y + 1.25), 1, 1.25, 0,
+            new Color(0.5, 0.5, 0.5, 1))
+
+        drawCircle(vec2(this.pos.x, this.pos.y + 2.25), 0.5,
+            new Color(1, 0.65, 0.65, 1))
+
+        drawLine(
+            vec2(this.pos.x + 0.05, this.pos.y + 2.25),
+            vec2(this.pos.x + 0.25, this.pos.y + 2.45), 0.1,
+            new Color(0.25, 0.25, 0.25, 1.0))
+
+        drawLine(
+            vec2(this.pos.x - 0.05, this.pos.y + 2.25),
+            vec2(this.pos.x - 0.25 , this.pos.y + 2.45), 0.1,
+            new Color(0.25, 0.25, 0.25, 1.0))
+
+        if (!this.state) {
+            drawPoly([
+                    vec2(this.pos.x-0.75, this.pos.y+1.5),
+                    vec2(this.pos.x-0.5, this.pos.y + 0.5),
+                    vec2(this.pos.x + 0.5, this.pos.y + 0.5),
+                    vec2(this.pos.x + 0.75, this.pos.y + 1.5)
+                ],
+                new Color(0.25, 0.25, 0.25, 1))
+        } else {
+            drawPoly([
+                    vec2(this.pos.x-0.5, this.pos.y+1.5),
+                    vec2(this.pos.x-0.75, this.pos.y + 0.5),
+                    vec2(this.pos.x + 0.75, this.pos.y + 0.5),
+                    vec2(this.pos.x + 0.5, this.pos.y + 1.5)
+                ],
+                new Color(0.25, 0.25, 0.25, 1))
+        }
+
+        drawCircle(vec2(this.pos.x-0.5, this.pos.y + 1), 0.25,
+            new Color(1, 0.65, 0.65, 1))
+        drawCircle(vec2(this.pos.x+0.5, this.pos.y + 1), 0.25,
+            new Color(1, 0.65, 0.65, 1))
+
+        drawLine(
+            vec2(this.pos.x - 1.5, this.pos.y + 3),
+            vec2(this.pos.x + 1.5, this.pos.y + 3))
+    }
+
+    public update() {
+        super.update()
+
+        if (this.stateTimer.isSet() && this.stateTimer.elapsed()) {
+            this.state = true
+            this.stateTimer.unset()
+            this.bucketTimer.set(BUCKET_STATE)
+
+            const water = new Water(this.pos)
+            water.color = new Color(0.5, 0.5, 1, 1)
+        } else if (this.bucketTimer.isSet() &&  this.bucketTimer.elapsed()) {
+            this.state = false
+            this.stateTimer.set(STATE_TIME)
+            this.bucketTimer.unset()
+        }
+    }
+}
+
 export class WindowSill extends EngineObject {
     private type: number;
 
@@ -139,12 +264,15 @@ export class WindowSill extends EngineObject {
         this.type = Math.floor(Math.random() * 4) | WINDOW_TYPE_OPEN;
 
         // Create a plant on the window sill at a random cadence
-        switch (Math.floor(Math.random() * 3)) {
+        switch (Math.floor(Math.random() * 4)) {
             case 0:
                 new Plant(vec2(pos.x, pos.y + 0.75))
                 break;
             case 1:
                 new Pie(vec2(pos.x, pos.y + 0.75))
+                break;
+            case 2:
+                new Flower(vec2(pos.x, pos.y + 0.75))
                 break;
             default:
         }

@@ -115,8 +115,9 @@ export class GameScene extends Scene {
     private countDown: Timer;
     private cameraOffset: number;
     private catReached: boolean;
+    // private lerpY: number;
     // private rain: ParticleEmitter;
-    private lerpFactor: number = 0
+    // private lerpFactor: number = 0
 
     protected finished: boolean;
 
@@ -130,8 +131,8 @@ export class GameScene extends Scene {
         new Building()
 
         this.countDown = new Timer(5);
-        this.cameraOffset = 0
         this.finished = false;
+        this.cameraOffset = 0
         this.catReached = false;
 /*
         this.rain = new ParticleEmitter(vec2(6, 14), (5/4) * Math.PI, vec2(24,1), 0, 150, 0, tile(3, 16),
@@ -162,18 +163,16 @@ export class GameScene extends Scene {
         }
 
         if (this.countDown.elapsed() && this.catReached) {
-            this.cameraOffset -= 0.01
-            setCameraPos(vec2(0, -this.cameraOffset))
-
-            if (this.cat.pos.y + this.cameraOffset > 10) {
-                this.lerpFactor += 0.0001
-                this.cameraOffset = lerp(this.lerpFactor, this.cameraOffset, -this.cat.pos.y + 6)
+            if (catPosY - this.cameraOffset >= 10) {
+                // this.cameraOffset = lerp(this.lerpY, catPosY - 10, catPosY)
+                this.cameraOffset = catPosY - 10
+            } else {
+                this.cameraOffset += 0.01
             }
-        } else if (this.catReached) {
+            setCameraPos(vec2(0, this.cameraOffset))
+        }  else if (this.catReached) {
             this.countDown.set(0)
         }
-
-        // this.rain.pos = vec2(this.rain.pos.x, 14 - this.cameraOffset)
     }
 
     public drawOverlay(): void {
@@ -202,10 +201,10 @@ export class GameScene extends Scene {
             undefined
             , mainContext);
 
-        drawRect(vec2(0, -11 - this.cameraOffset), vec2(15, 5), new Color(0, 0, 0, 1));
+        drawRect(vec2(0, -11 + this.cameraOffset), vec2(15, 5), new Color(0, 0, 0, 1));
 
         drawText("Smashables: " + this.cat.getScore() + "%",
-            vec2(0, -10 - this.cameraOffset),
+            vec2(0, -10 + this.cameraOffset),
             1, new Color(1, 1, 0, 1),
             0.2, new Color(0, 0, 0, 1),
             'center',
@@ -217,8 +216,8 @@ export class GameScene extends Scene {
 
     public draw(): void {
         // Draw building outline
-        drawLine(vec2(-7,-8.5), vec2(-7,13 - this.cameraOffset) )
-        drawLine(vec2(7,-8.5), vec2(7,13 - this.cameraOffset) )
+        drawLine(vec2(-7,-8.5), vec2(-7,13 + this.cameraOffset) )
+        drawLine(vec2(7,-8.5), vec2(7,13 + this.cameraOffset) )
 
         // Draw door
         // drawCircle(vec2(0,-5.5), 2, new Color(0.4,0.22,0.19,1))

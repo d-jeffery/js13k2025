@@ -1,5 +1,5 @@
 import {vec2} from "littlejsengine";
-import {WindowSill} from "./sprites.ts";
+import {WindowSill, WindowSillEnemy} from "./sprites.ts";
 
 export class Building {
 
@@ -12,7 +12,7 @@ export class Building {
         new WindowSill(vec2(-posx, -posy), vec2(width, height));
         new WindowSill(vec2(posx, -posy), vec2(width, height));
 
-        const levels = [0,1,0,1,1,1];
+        const levels = [0,1,0,1,1,1,0,2];
         for (const [index, level] of levels.entries()) {
             windowConfigs[level](posx, posy*index, width, height);
         }
@@ -33,4 +33,9 @@ const windowConfigs: windowConfigOptions = {
         new WindowSill(vec2(0, posy), vec2(width, height));
         new WindowSill(vec2(posx, posy), vec2(width, height));
     },
+    2: (posx: number, posy: number, width:number, height:number) => {
+        new WindowSill(vec2(-posx, posy), vec2(width, height));
+        new WindowSillEnemy(vec2(0, posy), vec2(width, height));
+        new WindowSill(vec2(posx, posy), vec2(width, height));
+    }
 }
