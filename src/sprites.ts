@@ -35,8 +35,12 @@ export class Cat extends EngineObject {
         this.renderOrder = CAT_LAYER;
         this.score = 0;
         this.friction = 0.1;
-        this.lives = 3;
+        this.lives = 9;
         this.lastFrames = []
+    }
+
+    public getLives(): number {
+        return this.lives;
     }
 
     public damage(): void {
@@ -196,6 +200,20 @@ const WINDOW_WITH_DRAPES = 2;
 const STATE_TIME = 2.5
 const BUCKET_STATE = 2.5
 
+export class JumpScareEnemy extends EngineObject {
+    private lights: boolean;
+    private stateHidden: boolean;
+    constructor(pos: Vector2, size: Vector2) {
+        super(pos, size);
+        this.setCollision();
+        this.mass = 0;
+        this.renderOrder = BACKGROUND_LAYER;
+        this.lights = false
+        this.stateHidden = true
+    }
+
+}
+
 export class WindowSillEnemy extends EngineObject {
     private bucketTimer: Timer;
     private stateTimer: Timer;
@@ -269,7 +287,7 @@ export class WindowSillEnemy extends EngineObject {
 
     public update() {
         super.update()
-        if (this.pos.y - 14 > cameraPos.y) {
+        if (this.pos.y - 20 > cameraPos.y) {
             return
         }
 

@@ -177,12 +177,23 @@ export class GameScene extends Scene {
     }
 
     public drawOverlay(): void {
+        drawRect(vec2(0, -10.5 + this.cameraOffset), vec2(15, 4), new Color(1, 1, 1, 1), 0, true);
 
-        drawRect(vec2(0, -11 + this.cameraOffset), vec2(15, 5), new Color(0, 0, 0, 1), 0, true);
+        drawRect(vec2(0, -10.5+ this.cameraOffset), vec2(13.5, 3), new Color(0, 0, 0, 1), 0, true);
+
 
         drawText("Smashables: " + this.cat.getScore(),
             vec2(0, -10 + this.cameraOffset),
-            1, Colors.yellow,
+            0.8, Colors.yellow,
+            0.2, new Color(0, 0, 0, 1),
+            'center',
+            fontDefault,
+            undefined,
+            overlayContext);
+
+        drawText("Lives: " + this.cat.getLives(),
+            vec2(0, -11 + this.cameraOffset),
+            0.8, Colors.yellow,
             0.2, new Color(0, 0, 0, 1),
             'center',
             fontDefault,
@@ -191,6 +202,8 @@ export class GameScene extends Scene {
     }
 
     public draw(): void {
+        drawRect(vec2(0, 2 + this.cameraOffset), vec2(14, 22), new Color(0.1, 0.1, 0.1, 1), 0, false);
+
         // Draw building outline
         drawLine(vec2(-7, -8.5), vec2(-7, 13 + this.cameraOffset), 0.1, Colors.white, false)
         drawLine(vec2(7, -8.5), vec2(7, 13 + this.cameraOffset), 0.1, Colors.white, false)
