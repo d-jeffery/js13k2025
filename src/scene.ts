@@ -6,7 +6,7 @@ import {
     drawTile,
     vec2,
     mouseIsDown, setCameraScale, Timer, setCameraPos, drawText, fontDefault, overlayContext, drawLine,
-    drawRect, mainContext, worldToScreen, engineObjects,
+    drawRect, mainContext, worldToScreen, engineObjects, RandomGenerator,
 } from "littlejsengine";
 import {drawGradientCircle} from "./draw.ts";
 import {Cat, Ground} from "./sprites.ts";
@@ -130,7 +130,7 @@ export class GameScene extends Scene {
 
         this.cat = new Cat(vec2(0, -7.5));
 
-        this.building = new Building()
+        this.building = new Building(new RandomGenerator(1337))
 
         this.countDown = new Timer(5);
         this.finished = false;
@@ -266,7 +266,6 @@ export class EndScene extends Scene {
 
         this.finished = false
     }
-
 
     public draw(): void {
         drawText("Game Over!\nClick to Restart",

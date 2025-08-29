@@ -1,12 +1,13 @@
-import {vec2} from "littlejsengine";
+import {RandomGenerator, vec2} from "littlejsengine";
 import {ClosedWindowSill, WindowSillBase, WindowSillEnemy} from "./sprites.ts";
+import * as Module from "node:module";
 
 export class Building {
 
     private windows: WindowSillBase[];
     private plantCount: number
 
-    constructor() {
+    constructor(randomGenerator: RandomGenerator) {
         this.plantCount = 0;
         this.windows = [];
 
@@ -15,19 +16,15 @@ export class Building {
         const width = 2.5
         const height = 0.5
 
-        this.windows.push(new ClosedWindowSill(vec2(-posx, -posy), vec2(width, height)));
-        this.windows.push(new ClosedWindowSill(vec2(posx, -posy), vec2(width, height)));
+        this.windows.push(new ClosedWindowSill(vec2(-posx, -posy), vec2(width, height), randomGenerator));
+        this.windows.push(new ClosedWindowSill(vec2(posx, -posy), vec2(width, height), randomGenerator));
 
         const levels = [0, 1, 0, 1, 1, 1, 0, 2, 0, 3, 1, 4];
         for (const [index, level] of levels.entries()) {
-            this.windows.push(...windowConfigs[level](posx, posy * index, width, height));
+            this.windows.push(...windowConfigs[level](posx, posy * index, width, height, randomGenerator));
         }
 
-        this.windows.forEach(w => {
-            if (w.doesHavePlant()) {
-                this.plantCount++;
-            }
-        })
+       this.plantCount = this.windows.filter(w => w.doesHavePlant()).length
     }
 
     public getPlantCount(): number {
@@ -36,40 +33,40 @@ export class Building {
 }
 
 interface windowConfigOptions {
-    [key: number]: (posx: number, posy: number, width: number, height: number) => WindowSillBase[]
+    [key: number]: (posx: number, posy: number, width: number, height: number, random: RandomGenerator) => WindowSillBase[]
 }
 
 const windowConfigs: windowConfigOptions = {
-    0: (posx: number, posy: number, width: number, height: number): WindowSillBase[] => {
+    0: (posx: number, posy: number, width: number, height: number, random: RandomGenerator): WindowSillBase[] => {
         return [
-            new ClosedWindowSill(vec2(-posx + width, posy), vec2(width, height)),
-            new ClosedWindowSill(vec2(posx - width, posy), vec2(width, height))
+            new ClosedWindowSill(vec2(-posx + width, posy), vec2(width, height), random),
+            new ClosedWindowSill(vec2(posx - width, posy), vec2(width, height), random)
         ]
     },
-    1: (posx: number, posy: number, width: number, height: number): WindowSillBase[] => {
+    1: (posx: number, posy: number, width: number, height: number, random: RandomGenerator): WindowSillBase[] => {
         return [
-            new ClosedWindowSill(vec2(-posx, posy), vec2(width, height)),
-            new ClosedWindowSill(vec2(0, posy), vec2(width, height)),
-            new ClosedWindowSill(vec2(posx, posy), vec2(width, height)),
+            new ClosedWindowSill(vec2(-posx, posy), vec2(width, height), random),
+            new ClosedWindowSill(vec2(0, posy), vec2(width, height), random),
+            new ClosedWindowSill(vec2(posx, posy), vec2(width, height), random),
         ]
     },
-    2: (posx: number, posy: number, width: number, height: number): WindowSillBase[] => {
+    2: (posx: number, posy: number, width: number, height: number, random: RandomGenerator): WindowSillBase[] => {
         return [
-            new ClosedWindowSill(vec2(-posx, posy), vec2(width, height)),
+            new ClosedWindowSill(vec2(-posx, posy), vec2(width, height), random),
             new WindowSillEnemy(vec2(0, posy), vec2(width, height)),
-            new ClosedWindowSill(vec2(posx, posy), vec2(width, height)),
+            new ClosedWindowSill(vec2(posx, posy), vec2(width, height), random),
         ]
     },
-    3: (posx: number, posy: number, width: number, height: number): WindowSillBase[] => {
+    3: (posx: number, posy: number, width: number, height: number, random: RandomGenerator): WindowSillBase[] => {
         return [
-            new ClosedWindowSill(vec2(-posx + width, posy), vec2(width, height)),
+            new ClosedWindowSill(vec2(-posx + width, posy), vec2(width, height), random),
             new WindowSillEnemy(vec2(posx - width, posy), vec2(width, height))
         ]
     },
-    4: (posx: number, posy: number, width: number, height: number): WindowSillBase[] => {
+    4: (posx: number, posy: number, width: number, height: number,random: RandomGenerator): WindowSillBase[] => {
         return [
             new WindowSillEnemy(vec2(-posx, posy), vec2(width, height)),
-            new ClosedWindowSill(vec2(0, posy), vec2(width, height)),
+            new ClosedWindowSill(vec2(0, posy), vec2(width, height), random),
             new WindowSillEnemy(vec2(posx, posy), vec2(width, height)),
         ]
     }

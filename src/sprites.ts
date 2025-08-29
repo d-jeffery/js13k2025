@@ -13,8 +13,6 @@ const BACKGROUND_LAYER = 0;
 const CAT_LAYER = 1;
 const DESTRUCTIBLE_LAYER = 2;
 
-const RAND = new RandomGenerator(1337)
-
 export class Cat extends EngineObject {
     private speed: number;
     private jumpSpeed: number
@@ -330,7 +328,7 @@ export class ClosedWindowSill extends WindowSillBase {
     private type: number;
     private hasPlant: boolean;
 
-    constructor(pos: Vector2, size: Vector2) {
+    constructor(pos: Vector2, size: Vector2, random: RandomGenerator) {
         super(pos, size);
         this.setCollision();
         this.mass = 0;
@@ -340,7 +338,7 @@ export class ClosedWindowSill extends WindowSillBase {
         this.hasPlant = false;
 
         // Create a plant on the window sill at a random cadence
-        switch (RAND.int(0, 4)) {
+        switch (random.int(0, 4)) {
             case 0:
                 new Plant(vec2(pos.x, pos.y + 0.75))
                 this.hasPlant = true
