@@ -116,6 +116,7 @@ export class GameScene extends Scene {
     private countDown: Timer;
     private cameraOffset: number;
     private catReached: boolean;
+    private building: Building;
     // private lerpY: number;
     // private rain: ParticleEmitter;
     // private lerpFactor: number = 0
@@ -129,7 +130,7 @@ export class GameScene extends Scene {
 
         this.cat = new Cat(vec2(0, -7.5));
 
-        new Building()
+        this.building = new Building()
 
         this.countDown = new Timer(5);
         this.finished = false;
@@ -177,13 +178,12 @@ export class GameScene extends Scene {
     }
 
     public drawOverlay(): void {
-        drawRect(vec2(0, -10.5 + this.cameraOffset), vec2(15, 4), new Color(1, 1, 1, 1), 0, true);
+        drawRect(vec2(0, -11 + this.cameraOffset), vec2(15, 3.5), new Color(1, 1, 1, 1), 0, true);
 
-        drawRect(vec2(0, -10.5+ this.cameraOffset), vec2(13.5, 3), new Color(0, 0, 0, 1), 0, true);
+        drawRect(vec2(0, -11 + this.cameraOffset), vec2(13.5, 3), new Color(0, 0, 0, 1), 0, true);
 
-
-        drawText("Smashables: " + this.cat.getScore(),
-            vec2(0, -10 + this.cameraOffset),
+        drawText("Smashables: " + this.cat.getScore() + "/" + this.building.getPlantCount(),
+            vec2(0, -10.5 + this.cameraOffset),
             0.8, Colors.yellow,
             0.2, new Color(0, 0, 0, 1),
             'center',
@@ -192,7 +192,7 @@ export class GameScene extends Scene {
             overlayContext);
 
         drawText("Lives: " + this.cat.getLives(),
-            vec2(0, -11 + this.cameraOffset),
+            vec2(0, -11.5 + this.cameraOffset),
             0.8, Colors.yellow,
             0.2, new Color(0, 0, 0, 1),
             'center',
@@ -202,7 +202,7 @@ export class GameScene extends Scene {
     }
 
     public draw(): void {
-        drawRect(vec2(0, 2 + this.cameraOffset), vec2(14, 22), new Color(0.1, 0.1, 0.1, 1), 0, false);
+        drawRect(vec2(0, 2 + this.cameraOffset), vec2(14, 23), new Color(0.1, 0.1, 0.1, 1), 0, false);
 
         // Draw building outline
         drawLine(vec2(-7, -8.5), vec2(-7, 13 + this.cameraOffset), 0.1, Colors.white, false)

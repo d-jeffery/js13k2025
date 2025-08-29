@@ -3,7 +3,7 @@ import {
     Color, drawCircle, drawEllipse, drawLine, drawPoly,
     drawRect,
     EngineObject, gamepadStick, gamepadWasPressed, gamepadWasReleased, isUsingGamepad, keyDirection,
-    keyWasPressed, keyWasReleased,
+    keyWasPressed, keyWasReleased, RandomGenerator,
     tile, Timer, vec2, type Vector2, worldToScreen
 } from "littlejsengine";
 import {drawCircleSegment} from "./draw.ts";
@@ -13,6 +13,7 @@ const BACKGROUND_LAYER = 0;
 const CAT_LAYER = 1;
 const DESTRUCTIBLE_LAYER = 2;
 
+const RAND = new RandomGenerator(1337)
 
 export class Cat extends EngineObject {
     private speed: number;
@@ -200,7 +201,7 @@ const WINDOW_WITH_DRAPES = 2;
 const STATE_TIME = 2.5
 const BUCKET_STATE = 2.5
 
-export class JumpScareEnemy extends EngineObject {
+/*export class JumpScareEnemy extends EngineObject {
     private lights: boolean;
     private stateHidden: boolean;
     constructor(pos: Vector2, size: Vector2) {
@@ -212,9 +213,26 @@ export class JumpScareEnemy extends EngineObject {
         this.stateHidden = true
     }
 
+}*/
+
+
+export abstract class WindowSillBase extends EngineObject {
+    constructor(pos: Vector2, size: Vector2) {
+        super(pos, size);
+        this.setCollision();
+        this.mass = 0;
+        this.renderOrder = BACKGROUND_LAYER;
+        this.color = Colors.clear
+    }
+
+    abstract render(): void;
+
+    abstract update(): void;
+
+    abstract doesHavePlant(): boolean;
 }
 
-export class WindowSillEnemy extends EngineObject {
+export class WindowSillEnemy extends WindowSillBase {
     private bucketTimer: Timer;
     private stateTimer: Timer;
     private state: boolean;
@@ -231,8 +249,6 @@ export class WindowSillEnemy extends EngineObject {
     }
 
     public render() {
-        super.render();
-
         drawRect(
             vec2(this.pos.x, this.pos.y + 1.5),
             vec2(this.size.x, this.size.y - 3),
@@ -286,7 +302,6 @@ export class WindowSillEnemy extends EngineObject {
     }
 
     public update() {
-        super.update()
         if (this.pos.y - 20 > cameraPos.y) {
             return
         }
@@ -305,10 +320,15 @@ export class WindowSillEnemy extends EngineObject {
             this.bucketTimer.unset()
         }
     }
+
+    public doesHavePlant(): boolean {
+        return false
+    }
 }
 
-export class WindowSill extends EngineObject {
+export class ClosedWindowSill extends WindowSillBase {
     private type: number;
+    private hasPlant: boolean;
 
     constructor(pos: Vector2, size: Vector2) {
         super(pos, size);
@@ -317,25 +337,27 @@ export class WindowSill extends EngineObject {
         this.renderOrder = BACKGROUND_LAYER;
         this.type = Math.floor(Math.random() * 4) | WINDOW_TYPE_OPEN;
         this.color = Colors.clear
+        this.hasPlant = false;
 
         // Create a plant on the window sill at a random cadence
-        switch (Math.floor(Math.random() * 4)) {
+        switch (RAND.int(0, 4)) {
             case 0:
                 new Plant(vec2(pos.x, pos.y + 0.75))
+                this.hasPlant = true
                 break;
             case 1:
                 new Pie(vec2(pos.x, pos.y + 0.75))
+                this.hasPlant = true
                 break;
             case 2:
                 new Flower(vec2(pos.x, pos.y + 0.75))
+                this.hasPlant = true
                 break;
             default:
         }
     }
 
     public render() {
-        super.render();
-
         switch (this.type) {
             case WINDOW_TYPE_CLOSE:
                 drawRect(
@@ -383,5 +405,12 @@ export class WindowSill extends EngineObject {
             vec2(this.pos.x - 1.5, this.pos.y + 3),
             vec2(this.pos.x + 1.5, this.pos.y + 3),
             0.1, Colors.white, false)
+    }
+
+    public update() {
+    }
+
+    public doesHavePlant(): boolean {
+        return this.hasPlant
     }
 }
