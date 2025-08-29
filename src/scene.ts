@@ -177,14 +177,45 @@ export class GameScene extends Scene {
     }
 
     public drawOverlay(): void {
+
+        drawRect(vec2(0, -11 + this.cameraOffset), vec2(15, 5), new Color(0, 0, 0, 1), 0, true);
+
+        drawText("Smashables: " + this.cat.getScore(),
+            vec2(0, -10 + this.cameraOffset),
+            1, Colors.yellow,
+            0.2, new Color(0, 0, 0, 1),
+            'center',
+            fontDefault,
+            undefined,
+            overlayContext);
+    }
+
+    public draw(): void {
+        // Draw building outline
+        drawLine(vec2(-7, -8.5), vec2(-7, 13 + this.cameraOffset), 0.1, Colors.white, false)
+        drawLine(vec2(7, -8.5), vec2(7, 13 + this.cameraOffset), 0.1, Colors.white, false)
+
+        // Draw door
+        // drawCircle(vec2(0,-5.5), 2, new Color(0.4,0.22,0.19,1))
+        //drawRect(vec2(0,-7), vec2(4,3), Colors.brown, 0, false)
+
+        drawRect(vec2(0, -5.75), vec2(4, -5.5), Colors.brown, 0, false)
+        drawLine(vec2(-2, -3), vec2(2, -3), 0.1, Colors.white, false)
+        drawLine(vec2(0, -8.5), vec2(0, -3), 0.1, Colors.white,false)
+        drawLine(vec2(2, -8.5), vec2(2, -3), 0.1, Colors.white,false)
+        drawLine(vec2(-2, -8.5), vec2(-2, -3), 0.1, Colors.white,false)
+
+        drawLine(vec2(0.5, -5), vec2(0.5, -6), 0.1, Colors.yellow,false)
+        drawLine(vec2(-0.5, -5), vec2(-0.5, -6), 0.1, Colors.yellow,false)
+
         // const font = new FontImage(this.fontImg, vec2(16, 16), vec2(0, 0));
         drawText("Locked out again!",
             vec2(0, -1.5), 0.8, Colors.yellow,
             0.1, new Color(0, 0, 0, 1),
             'center',
             fontDefault,
-            undefined
-            , mainContext);
+            undefined,
+            mainContext);
 
         drawText("I'll need to double jump\njust to reach these windows...",
             vec2(0, 4.5), 0.8, Colors.yellow,
@@ -201,38 +232,6 @@ export class GameScene extends Scene {
             fontDefault,
             undefined,
             mainContext);
-
-        drawRect(vec2(0, -11 + this.cameraOffset), vec2(15, 5), new Color(0, 0, 0, 1));
-
-        drawText("Smashables: " + this.cat.getScore() + "%",
-            vec2(0, -10 + this.cameraOffset),
-            1, Colors.yellow,
-            0.2, new Color(0, 0, 0, 1),
-            'center',
-            fontDefault,
-            undefined,
-            overlayContext);
-
-    }
-
-    public draw(): void {
-        // Draw building outline
-        drawLine(vec2(-7, -8.5), vec2(-7, 13 + this.cameraOffset))
-        drawLine(vec2(7, -8.5), vec2(7, 13 + this.cameraOffset))
-
-        // Draw door
-        // drawCircle(vec2(0,-5.5), 2, new Color(0.4,0.22,0.19,1))
-        //drawRect(vec2(0,-7), vec2(4,3), new Color(0.4,0.22,0.19,1))
-
-        drawRect(vec2(0, -5.75), vec2(4, -5.5), Colors.brown)
-        drawLine(vec2(-2, -3), vec2(2, -3), 0.1, Colors.white)
-        drawLine(vec2(0, -8.5), vec2(0, -3), 0.1, Colors.white)
-        drawLine(vec2(2, -8.5), vec2(2, -3), 0.1, Colors.white)
-        drawLine(vec2(-2, -8.5), vec2(-2, -3), 0.1, Colors.white)
-
-        drawLine(vec2(0.5, -5), vec2(0.5, -6), 0.1, Colors.yellow)
-        drawLine(vec2(-0.5, -5), vec2(-0.5, -6), 0.1, Colors.yellow)
-
     }
 
     public isFinished(): boolean {

@@ -21,6 +21,7 @@ export class Cat extends EngineObject {
     private jumpCount: number;
     private score: number;
     private lives: number;
+    private lastFrames: Vector2[];
 
     constructor(pos: Vector2 = vec2(0, 0)) {
         super(pos);
@@ -35,6 +36,7 @@ export class Cat extends EngineObject {
         this.score = 0;
         this.friction = 0.1;
         this.lives = 3;
+        this.lastFrames = []
     }
 
     public damage(): void {
@@ -51,6 +53,11 @@ export class Cat extends EngineObject {
 
     public update(): void {
         super.update()
+
+        this.lastFrames.push(this.pos.copy())
+        if (this.lastFrames.length > 10) {
+            this.lastFrames.shift()
+        }
 
         const moveInput = isUsingGamepad ? gamepadStick(0) : keyDirection()
         if (moveInput.x !== 0) {
@@ -79,6 +86,13 @@ export class Cat extends EngineObject {
 
     public render() {
         super.render();
+
+        for (let f of this.lastFrames) {
+            drawCircle(vec2(f.x, f.y - 0.05),
+                (0.5),
+                Colors.black, 0.05,
+                new Color(0.1, 0.1, 0.1, 1))
+        }
     }
 }
 
@@ -138,11 +152,13 @@ class Water extends EngineObject {
         this.setCollision()
         this.mass = 0.01
         this.renderOrder = CAT_LAYER
+        this.color =  new Color(0, 0, 1, 0.5)
         // this.setCollision(false, true)
 
     }
 
     public render(): void {
+        super.render()
         for (let i = 0; i < 5; i++) {
             drawCircle(vec2(this.pos.x, this.pos.y + (0.25 * i)),
                 (0.5 - (0.1 * i)),
@@ -202,7 +218,7 @@ export class WindowSillEnemy extends EngineObject {
         drawRect(
             vec2(this.pos.x, this.pos.y + 1.5),
             vec2(this.size.x, this.size.y - 3),
-            new Color(1, 1, 0.38, 1), 0 , false);
+            new Color(1, 1, 0.38, 1), 0, false);
 
         drawEllipse(vec2(this.pos.x, this.pos.y + 1.25), 1, 1.25, 0,
             Colors.grey)
@@ -213,12 +229,12 @@ export class WindowSillEnemy extends EngineObject {
         drawLine(
             vec2(this.pos.x + 0.05, this.pos.y + 2.25),
             vec2(this.pos.x + 0.25, this.pos.y + 2.45), 0.1,
-            Colors.dark_grey)
+            Colors.dark_grey, false)
 
         drawLine(
             vec2(this.pos.x - 0.05, this.pos.y + 2.25),
             vec2(this.pos.x - 0.25 , this.pos.y + 2.45), 0.1,
-            Colors.dark_grey)
+            Colors.dark_grey,  false)
 
         if (!this.state) {
             drawPoly([
@@ -247,12 +263,13 @@ export class WindowSillEnemy extends EngineObject {
 
         drawLine(
             vec2(this.pos.x - 1.5, this.pos.y + 3),
-            vec2(this.pos.x + 1.5, this.pos.y + 3))
+            vec2(this.pos.x + 1.5, this.pos.y + 3),
+            0.1, Colors.white, false)
     }
 
     public update() {
         super.update()
-        if (this.pos.y - 12 > cameraPos.y) {
+        if (this.pos.y - 14 > cameraPos.y) {
             return
         }
 
@@ -306,13 +323,15 @@ export class WindowSill extends EngineObject {
                 drawRect(
                     vec2(this.pos.x, this.pos.y + 1.5),
                     vec2(this.size.x, this.size.y - 3),
-                    Colors.dark_grey);
+                    Colors.dark_grey, 0, false);
                 drawLine(
                     vec2(this.pos.x - 1.25, this.pos.y + 1.5),
-                    vec2(this.pos.x + 1.25, this.pos.y + 1.5));
+                    vec2(this.pos.x + 1.25, this.pos.y + 1.5),
+                    0.1, Colors.white, false);
                 drawLine(
                     vec2(this.pos.x, this.pos.y + 2.75),
-                    vec2(this.pos.x, this.pos.y));
+                    vec2(this.pos.x, this.pos.y),
+                    0.1, Colors.white, false);
                 break;
             case WINDOW_WITH_DRAPES:
                 drawRect(
@@ -337,13 +356,14 @@ export class WindowSill extends EngineObject {
                 drawRect(
                     vec2(this.pos.x, this.pos.y + 1.5),
                     vec2(this.size.x, this.size.y - 3),
-                    Colors.grey);
+                    Colors.grey, 0, false);
         }
 
         drawRect(this.pos, this.size, Colors.white, 0, false)
 
         drawLine(
             vec2(this.pos.x - 1.5, this.pos.y + 3),
-            vec2(this.pos.x + 1.5, this.pos.y + 3))
+            vec2(this.pos.x + 1.5, this.pos.y + 3),
+            0.1, Colors.white, false)
     }
 }
