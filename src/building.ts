@@ -12,7 +12,7 @@ export class Building {
         new WindowSill(vec2(-posx, -posy), vec2(width, height));
         new WindowSill(vec2(posx, -posy), vec2(width, height));
 
-        const levels = [0,1,0,1,1,1,0,2];
+        const levels = [0,1,0,1,1,1,0,2,0,3,1];
         for (const [index, level] of levels.entries()) {
             windowConfigs[level](posx, posy*index, width, height);
         }
@@ -37,5 +37,10 @@ const windowConfigs: windowConfigOptions = {
         new WindowSill(vec2(-posx, posy), vec2(width, height));
         new WindowSillEnemy(vec2(0, posy), vec2(width, height));
         new WindowSill(vec2(posx, posy), vec2(width, height));
+    },
+    3: (posx: number, posy: number, width:number, height:number) => {
+        new WindowSillEnemy(vec2(-posx, posy), vec2(width, height));
+        new WindowSill(vec2(0, posy), vec2(width, height));
+        new WindowSillEnemy(vec2(posx, posy), vec2(width, height));
     }
 }

@@ -1,4 +1,5 @@
 import {
+    cameraPos,
     Color, drawCircle, drawEllipse, drawLine, drawPoly,
     drawRect,
     EngineObject, gamepadStick, gamepadWasPressed, gamepadWasReleased, isUsingGamepad, keyDirection,
@@ -6,6 +7,7 @@ import {
     tile, Timer, vec2, type Vector2, worldToScreen
 } from "littlejsengine";
 import {drawCircleSegment} from "./draw.ts";
+import {Colors} from "./utils.ts";
 
 const BACKGROUND_LAYER = 0;
 const CAT_LAYER = 1;
@@ -134,8 +136,18 @@ class Water extends EngineObject {
         super(pos);
         this.tileInfo = tile(4, 16);
         this.setCollision()
-        this.mass = 0.1
+        this.mass = 0.01
+        this.renderOrder = CAT_LAYER
         // this.setCollision(false, true)
+
+    }
+
+    public render(): void {
+        for (let i = 0; i < 5; i++) {
+            drawCircle(vec2(this.pos.x, this.pos.y + (0.25 * i)),
+                (0.5 - (0.1 * i)),
+                new Color(0, 0, 1, 0.5), 0, )
+        }
     }
 
     public collideWithObject(object: EngineObject): boolean {
@@ -181,6 +193,7 @@ export class WindowSillEnemy extends EngineObject {
         this.bucketTimer = new Timer(BUCKET_STATE)
         this.stateTimer = new Timer(STATE_TIME)
         this.state = false
+        this.color = Colors.clear
     }
 
     public render() {
@@ -192,20 +205,20 @@ export class WindowSillEnemy extends EngineObject {
             new Color(1, 1, 0.38, 1), 0 , false);
 
         drawEllipse(vec2(this.pos.x, this.pos.y + 1.25), 1, 1.25, 0,
-            new Color(0.5, 0.5, 0.5, 1))
+            Colors.grey)
 
         drawCircle(vec2(this.pos.x, this.pos.y + 2.25), 0.5,
-            new Color(1, 0.65, 0.65, 1))
+            Colors.skin)
 
         drawLine(
             vec2(this.pos.x + 0.05, this.pos.y + 2.25),
             vec2(this.pos.x + 0.25, this.pos.y + 2.45), 0.1,
-            new Color(0.25, 0.25, 0.25, 1.0))
+            Colors.dark_grey)
 
         drawLine(
             vec2(this.pos.x - 0.05, this.pos.y + 2.25),
             vec2(this.pos.x - 0.25 , this.pos.y + 2.45), 0.1,
-            new Color(0.25, 0.25, 0.25, 1.0))
+            Colors.dark_grey)
 
         if (!this.state) {
             drawPoly([
@@ -214,7 +227,7 @@ export class WindowSillEnemy extends EngineObject {
                     vec2(this.pos.x + 0.5, this.pos.y + 0.5),
                     vec2(this.pos.x + 0.75, this.pos.y + 1.5)
                 ],
-                new Color(0.25, 0.25, 0.25, 1))
+                Colors.dark_grey)
         } else {
             drawPoly([
                     vec2(this.pos.x-0.5, this.pos.y+1.5),
@@ -222,13 +235,15 @@ export class WindowSillEnemy extends EngineObject {
                     vec2(this.pos.x + 0.75, this.pos.y + 0.5),
                     vec2(this.pos.x + 0.5, this.pos.y + 1.5)
                 ],
-                new Color(0.25, 0.25, 0.25, 1))
+                Colors.dark_grey)
         }
 
         drawCircle(vec2(this.pos.x-0.5, this.pos.y + 1), 0.25,
-            new Color(1, 0.65, 0.65, 1))
+            Colors.skin)
         drawCircle(vec2(this.pos.x+0.5, this.pos.y + 1), 0.25,
-            new Color(1, 0.65, 0.65, 1))
+            Colors.skin)
+
+        drawRect(this.pos, this.size, Colors.white, 0, false)
 
         drawLine(
             vec2(this.pos.x - 1.5, this.pos.y + 3),
@@ -237,14 +252,18 @@ export class WindowSillEnemy extends EngineObject {
 
     public update() {
         super.update()
+        if (this.pos.y - 12 > cameraPos.y) {
+            return
+        }
 
         if (this.stateTimer.isSet() && this.stateTimer.elapsed()) {
             this.state = true
             this.stateTimer.unset()
             this.bucketTimer.set(BUCKET_STATE)
 
-            const water = new Water(this.pos)
-            water.color = new Color(0.5, 0.5, 1, 1)
+            new Water(this.pos)
+
+            // water.color = new Color(0.5, 0.5, 1, 1)
         } else if (this.bucketTimer.isSet() &&  this.bucketTimer.elapsed()) {
             this.state = false
             this.stateTimer.set(STATE_TIME)
@@ -262,6 +281,7 @@ export class WindowSill extends EngineObject {
         this.mass = 0;
         this.renderOrder = BACKGROUND_LAYER;
         this.type = Math.floor(Math.random() * 4) | WINDOW_TYPE_OPEN;
+        this.color = Colors.clear
 
         // Create a plant on the window sill at a random cadence
         switch (Math.floor(Math.random() * 4)) {
@@ -286,7 +306,7 @@ export class WindowSill extends EngineObject {
                 drawRect(
                     vec2(this.pos.x, this.pos.y + 1.5),
                     vec2(this.size.x, this.size.y - 3),
-                    new Color(0.25, 0.25, 0.25, 1));
+                    Colors.dark_grey);
                 drawLine(
                     vec2(this.pos.x - 1.25, this.pos.y + 1.5),
                     vec2(this.pos.x + 1.25, this.pos.y + 1.5));
@@ -298,31 +318,32 @@ export class WindowSill extends EngineObject {
                 drawRect(
                     vec2(this.pos.x, this.pos.y + 1.5),
                     vec2(this.size.x, this.size.y - 3),
-                    new Color(0.25, 0.25, 0.25, 1),
+                    Colors.dark_grey,
                     0, false);
                  drawCircleSegment(
                      worldToScreen(vec2(this.pos.x-1.25, this.pos.y+2.75)),
                      45,
                      0,
                      Math.PI/2,
-                     new Color(0.5, 0.5, 0.5, 1))
+                     Colors.grey)
                  drawCircleSegment(
                      worldToScreen(vec2(this.pos.x+1.25, this.pos.y+2.75)),
                      45,
                      Math.PI/2,
                      Math.PI,
-                     new Color(0.5, 0.5, 0.5, 1))
+                     Colors.grey)
                 break;
             default:
                 drawRect(
                     vec2(this.pos.x, this.pos.y + 1.5),
                     vec2(this.size.x, this.size.y - 3),
-                    new Color(0.5, 0.5, 0.5, 1));
+                    Colors.grey);
         }
+
+        drawRect(this.pos, this.size, Colors.white, 0, false)
 
         drawLine(
             vec2(this.pos.x - 1.5, this.pos.y + 3),
             vec2(this.pos.x + 1.5, this.pos.y + 3))
-
     }
 }

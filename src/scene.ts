@@ -6,11 +6,12 @@ import {
     drawTile,
     vec2,
     mouseIsDown, setCameraScale, Timer, setCameraPos, drawText, fontDefault, overlayContext, drawLine,
-    drawRect, mainContext, worldToScreen, engineObjects, lerp,
+    drawRect, mainContext, worldToScreen, engineObjects,
 } from "littlejsengine";
 import {drawGradientCircle} from "./draw.ts";
 import {Cat, Ground} from "./sprites.ts";
 import {Building} from "./building.ts";
+import {Colors} from "./utils.ts";
 
 export abstract class Scene {
     public abstract update(): void
@@ -75,23 +76,23 @@ export class IntroScene extends Scene {
         drawTile(vec2(0, -this.offsetY), vec2(5, 5), tile(0, 16));
 
 
-/*        drawText("Miss\nFortune",
-            vec2(0, 7),
-            16, new Color(1, 1, 0, 1),
-            0.2, new Color(0, 0, 0, 1),
-            'center',
-            'assets/awesome_9.png',
-            undefined,
-            overlayContext);
+        /*        drawText("Miss\nFortune",
+                    vec2(0, 7),
+                    16, Colors.yellow,
+                    0.2, new Color(0, 0, 0, 1),
+                    'center',
+                    'assets/awesome_9.png',
+                    undefined,
+                    overlayContext);
 
-        // const font = new FontImage(this.fontImg, vec2(16, 16), vec2(0, 0));
-        drawText("Click to\nPlay",
-            vec2(0, -5), 16, new Color(1, 1, 0, 1),
-            0.2, new Color(0, 0, 0, 1),
-            'center',
-            'assets/awesome_9.png',
-            undefined
-            , overlayContext);*/
+                // const font = new FontImage(this.fontImg, vec2(16, 16), vec2(0, 0));
+                drawText("Click to\nPlay",
+                    vec2(0, -5), 16, Colors.yellow,
+                    0.2, new Color(0, 0, 0, 1),
+                    'center',
+                    'assets/awesome_9.png',
+                    undefined
+                    , overlayContext);*/
 
     }
 
@@ -134,15 +135,15 @@ export class GameScene extends Scene {
         this.finished = false;
         this.cameraOffset = 0
         this.catReached = false;
-/*
-        this.rain = new ParticleEmitter(vec2(6, 14), (5/4) * Math.PI, vec2(24,1), 0, 150, 0, tile(3, 16),
-            new Color(0.57, 0.72, 0.82, 0.75),
-            new Color(0.57, 0.72, 0.82, 0.75),
-            new Color(0.77, 0.88, 0.96, 0.5),
-            new Color(0.77, 0.88, 0.96, 0.5),
-            2, 0.15, 0.1, 0.25, 0.05, 1, 1, 1, 3.14, 0.1, 0.25, false, false, true);
+        /*
+                this.rain = new ParticleEmitter(vec2(6, 14), (5/4) * Math.PI, vec2(24,1), 0, 150, 0, tile(3, 16),
+                    new Color(0.57, 0.72, 0.82, 0.75),
+                    new Color(0.57, 0.72, 0.82, 0.75),
+                    new Color(0.77, 0.88, 0.96, 0.5),
+                    new Color(0.77, 0.88, 0.96, 0.5),
+                    2, 0.15, 0.1, 0.25, 0.05, 1, 1, 1, 3.14, 0.1, 0.25, false, false, true);
 
-        this.rain.renderOrder = 3*/
+                this.rain.renderOrder = 3*/
 
         setCameraScale(50)
     }
@@ -170,7 +171,7 @@ export class GameScene extends Scene {
                 this.cameraOffset += 0.01
             }
             setCameraPos(vec2(0, this.cameraOffset))
-        }  else if (this.catReached) {
+        } else if (this.catReached) {
             this.countDown.set(0)
         }
     }
@@ -178,7 +179,7 @@ export class GameScene extends Scene {
     public drawOverlay(): void {
         // const font = new FontImage(this.fontImg, vec2(16, 16), vec2(0, 0));
         drawText("Locked out again!",
-            vec2(0, -1.5), 0.8, new Color(1, 1, 0, 1),
+            vec2(0, -1.5), 0.8, Colors.yellow,
             0.1, new Color(0, 0, 0, 1),
             'center',
             fontDefault,
@@ -186,26 +187,26 @@ export class GameScene extends Scene {
             , mainContext);
 
         drawText("I'll need to double jump\njust to reach these windows...",
-            vec2(0, 4.5), 0.8, new Color(1, 1, 0, 1),
+            vec2(0, 4.5), 0.8, Colors.yellow,
             0.1, new Color(0, 0, 0, 1),
             'center',
             fontDefault,
-            undefined
-            , mainContext);
+            undefined,
+            mainContext);
 
         drawText("And if I time it right,\nI can reach the penthouse!",
-            vec2(0, 10.5), 0.8, new Color(1, 1, 0, 1),
+            vec2(0, 10.5), 0.8, Colors.yellow,
             0.1, new Color(0, 0, 0, 1),
             'center',
             fontDefault,
-            undefined
-            , mainContext);
+            undefined,
+            mainContext);
 
         drawRect(vec2(0, -11 + this.cameraOffset), vec2(15, 5), new Color(0, 0, 0, 1));
 
         drawText("Smashables: " + this.cat.getScore() + "%",
             vec2(0, -10 + this.cameraOffset),
-            1, new Color(1, 1, 0, 1),
+            1, Colors.yellow,
             0.2, new Color(0, 0, 0, 1),
             'center',
             fontDefault,
@@ -216,21 +217,21 @@ export class GameScene extends Scene {
 
     public draw(): void {
         // Draw building outline
-        drawLine(vec2(-7,-8.5), vec2(-7,13 + this.cameraOffset) )
-        drawLine(vec2(7,-8.5), vec2(7,13 + this.cameraOffset) )
+        drawLine(vec2(-7, -8.5), vec2(-7, 13 + this.cameraOffset))
+        drawLine(vec2(7, -8.5), vec2(7, 13 + this.cameraOffset))
 
         // Draw door
         // drawCircle(vec2(0,-5.5), 2, new Color(0.4,0.22,0.19,1))
         //drawRect(vec2(0,-7), vec2(4,3), new Color(0.4,0.22,0.19,1))
 
-        drawRect(vec2(0,-5.75), vec2(4,-5.5), new Color(0.4,0.22,0.19,1))
-        drawLine(vec2(-2,-3), vec2(2,-3), 0.1, new Color(1,1,1,1))
-        drawLine(vec2(0,-8.5), vec2(0,-3), 0.1, new Color(1,1,1,1))
-        drawLine(vec2(2,-8.5), vec2(2,-3), 0.1, new Color(1,1,1,1))
-        drawLine(vec2(-2,-8.5), vec2(-2,-3), 0.1, new Color(1,1,1,1))
+        drawRect(vec2(0, -5.75), vec2(4, -5.5), Colors.brown)
+        drawLine(vec2(-2, -3), vec2(2, -3), 0.1, Colors.white)
+        drawLine(vec2(0, -8.5), vec2(0, -3), 0.1, Colors.white)
+        drawLine(vec2(2, -8.5), vec2(2, -3), 0.1, Colors.white)
+        drawLine(vec2(-2, -8.5), vec2(-2, -3), 0.1, Colors.white)
 
-        drawLine(vec2(0.5,-5), vec2(0.5,-6), 0.1, new Color(1,1,0,1))
-        drawLine(vec2(-0.5,-5), vec2(-0.5,-6), 0.1, new Color(1,1,0,1))
+        drawLine(vec2(0.5, -5), vec2(0.5, -6), 0.1, Colors.yellow)
+        drawLine(vec2(-0.5, -5), vec2(-0.5, -6), 0.1, Colors.yellow)
 
     }
 
@@ -257,12 +258,12 @@ export class EndScene extends Scene {
 
     public draw(): void {
         drawText("Game Over!\nClick to Restart",
-            vec2(0, 3), 0.8, new Color(1, 1, 0, 1),
-            0.1, new Color(0, 0, 0, 1),
+            vec2(0, 3), 0.8, Colors.yellow,
+            0.1, Colors.black,
             'center',
             fontDefault,
-            undefined
-            , mainContext);
+            undefined,
+            mainContext);
     }
 
     public drawOverlay(): void {
