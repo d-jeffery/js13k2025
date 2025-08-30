@@ -9,7 +9,7 @@ import {
     drawRect, mainContext, worldToScreen, engineObjects, RandomGenerator,
 } from "littlejsengine";
 import {drawGradientCircle} from "./draw.ts";
-import {Cat, Ground} from "./sprites.ts";
+import {Cat, Ground, PentHouse} from "./sprites.ts";
 import {Building} from "./building.ts";
 import {Colors} from "./utils.ts";
 
@@ -155,7 +155,7 @@ export class GameScene extends Scene {
         const catPos = worldToScreen(this.cat.pos)
 
         // End the scene if the cat goes off the bottom of the screen
-        if (catPos.y > 1160) {
+        if (catPos.y > 1280) {
             this.finished = true;
         }
 
@@ -174,6 +174,14 @@ export class GameScene extends Scene {
             setCameraPos(vec2(0, this.cameraOffset))
         } else if (this.catReached) {
             this.countDown.set(0)
+        }
+
+        if (this.cat.getLives() <= 0) {
+            this.finished = true;
+        }
+
+        if (this.cat.groundObject instanceof PentHouse) {
+            setTimeout(() => this.finished = true, 1000)
         }
     }
 

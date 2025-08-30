@@ -1,21 +1,23 @@
 import {
     cameraPos,
     Color, drawCircle, drawEllipse, drawLine, drawPoly,
-    drawRect,
-    EngineObject, gamepadStick, gamepadWasPressed, gamepadWasReleased, isUsingGamepad, keyDirection,
-    keyWasPressed, keyWasReleased, RandomGenerator,
-    tile, Timer, vec2, type Vector2, worldToScreen
+    drawRect, drawText,
+    EngineObject, fontDefault, gamepadStick, gamepadWasPressed, gamepadWasReleased, isUsingGamepad, keyDirection,
+    keyWasPressed, keyWasReleased, mainContext, RandomGenerator,
+    tile, time, Timer, vec2, type Vector2, worldToScreen
 } from "littlejsengine";
 import {drawCircleSegment} from "./draw.ts";
 import {Colors} from "./utils.ts";
 
+// Layer render order
 const BACKGROUND_LAYER = 0;
 const CAT_LAYER = 1;
 const DESTRUCTIBLE_LAYER = 2;
 
+// The player-controlled cat
 export class Cat extends EngineObject {
-    private speed: number;
-    private jumpSpeed: number
+    private readonly speed: number;
+    private readonly jumpSpeed: number
     private canDoubleJump: boolean;
     private jumpCount: number;
     private score: number;
@@ -27,7 +29,7 @@ export class Cat extends EngineObject {
 
         this.tileInfo = tile(0, 16)
         this.setCollision()
-        this.speed = 0.08; // Set a speed for the cat
+        this.speed = 0.08;
         this.jumpSpeed = 0.3
         this.canDoubleJump = false
         this.jumpCount = 0;
@@ -96,9 +98,30 @@ export class Cat extends EngineObject {
                 Colors.black, 0.05,
                 new Color(0.1, 0.1, 0.1, 1))
         }
+
+        // Wag tail
+        const tailBase = this.lastFrames[0] || this.pos;
+        const tailLength = 10;
+        const tailSegmentLength = 0.15;
+        const wagSpeed = 6; // Adjust for faster/slower wag
+        const wagAmplitude = 0.5; // Radians, adjust for more/less wag
+
+        for (let i = 0; i < tailLength; i++) {
+            // The further from the base, the less the wag
+            const t = i / tailLength;
+            const angle = Math.sin(time * wagSpeed - t * 1.5) * wagAmplitude * (1 - t);
+
+            // Calculate segment position
+            const x = tailBase.x - Math.sin(angle) * tailSegmentLength * i;
+            const y = tailBase.y + 0.1 * i;
+
+            drawCircle(vec2(x, y), 0.1 * (1 - t * 0.5), Colors.black, 0.01, new Color(0.1, 0.1, 0.1, 1));
+        }
+
     }
 }
 
+// Destructible objects that fall when hit by the cat
 class Destructible extends EngineObject {
     constructor(pos: Vector2) {
         super(pos, vec2(1, 1));
@@ -116,6 +139,10 @@ class Destructible extends EngineObject {
     }
 
     public collideWithObject(object: EngineObject): boolean {
+        // Dont double count if already falling
+        if (this.mass) {
+            return false
+        }
         if (object instanceof Cat) {
             this.setCollision(false, false)
             this.mass = 1
@@ -250,7 +277,7 @@ export class WindowSillEnemy extends WindowSillBase {
         drawRect(
             vec2(this.pos.x, this.pos.y + 1.5),
             vec2(this.size.x, this.size.y - 3),
-            new Color(1, 1, 0.38, 1), 0, false);
+            Colors.lightsOn, 0, false);
 
         drawEllipse(vec2(this.pos.x, this.pos.y + 1.25), 1, 1.25, 0,
             Colors.grey)
@@ -324,9 +351,66 @@ export class WindowSillEnemy extends WindowSillBase {
     }
 }
 
+export class PentHouse extends WindowSillBase {
+
+    constructor(pos: Vector2, size: Vector2) {
+        super(pos, size);
+    }
+    public render(): void {
+        drawRect(
+            vec2(this.pos.x, this.pos.y + 1.5),
+            vec2(this.size.x, this.size.y - 3),
+            Colors.lightsOn,
+            0, false);
+        drawCircleSegment(
+            worldToScreen(vec2(this.pos.x-3.75, this.pos.y+2.75)),
+            45,
+            0,
+            Math.PI/2,
+            Colors.grey)
+        drawCircleSegment(
+            worldToScreen(vec2(this.pos.x+3.75, this.pos.y+2.75)),
+            45,
+            Math.PI/2,
+            Math.PI,
+            Colors.grey)
+
+        drawRect(this.pos, this.size, Colors.white, 0, false)
+
+        drawLine(
+            vec2(this.pos.x - 3.75, this.pos.y + 1.5),
+            vec2(this.pos.x + 3.75, this.pos.y + 1.5),
+            0.2, Colors.white, false)
+
+        drawLine(
+            vec2(this.pos.x, this.pos.y + 2.75),
+            vec2(this.pos.x, this.pos.y + 1.375),
+            0.1, Colors.white, false);
+
+        drawLine(
+            vec2(this.pos.x - 4.25, this.pos.y + 3),
+            vec2(this.pos.x + 4.25, this.pos.y + 3),
+            0.1, Colors.white, false)
+
+        drawText("Home, Sweet Home!",
+            vec2(this.pos.x, this.pos.y + 3.5), 0.8, Colors.yellow,
+            0.1, Colors.black,
+            'center',
+            fontDefault,
+            undefined,
+            mainContext);
+    }
+    public update(): void {
+    }
+
+    public doesHavePlant(): boolean {
+       return false
+    }
+}
+
 export class ClosedWindowSill extends WindowSillBase {
-    private type: number;
-    private hasPlant: boolean;
+    private readonly type: number;
+    private readonly hasPlant: boolean;
 
     constructor(pos: Vector2, size: Vector2, random: RandomGenerator) {
         super(pos, size);
@@ -406,6 +490,7 @@ export class ClosedWindowSill extends WindowSillBase {
     }
 
     public update() {
+        // No update needed for closed windows
     }
 
     public doesHavePlant(): boolean {
