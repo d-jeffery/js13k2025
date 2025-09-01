@@ -1,7 +1,6 @@
 import {
     cameraPos,
-    drawCircle, drawEllipse, drawLine, drawPoly,
-    drawRect, drawText,
+    drawCircle, drawEllipse, drawLine, drawPoly, drawRect, drawText,
     EngineObject, fontDefault, gamepadStick, gamepadWasPressed, gamepadWasReleased, isUsingGamepad, keyDirection,
     keyWasPressed, keyWasReleased, mainContext, ParticleEmitter, RandomGenerator,
     tile, time, Timer, vec2, type Vector2, worldToScreen
@@ -84,22 +83,20 @@ export class Cat extends EngineObject {
             this.jumpCount = 0
         }
 
-        if (this.canDoubleJump && jumpButtonPressed && this.jumpCount == 2) {
+        if (this.canDoubleJump && jumpButtonPressed && this.jumpCount === 2) {
             this.velocity = vec2(this.velocity.x, this.jumpSpeed);
             this.canDoubleJump = false;
             this.jumpCount += 1
-        } else if (jumpReleased && this.jumpCount == 1) {
+        } else if (jumpReleased && this.jumpCount === 1) {
             this.canDoubleJump = true
             this.jumpCount += 1
-        } else if (jumpButtonPressed && this.jumpCount == 0) {
+        } else if (jumpButtonPressed && this.jumpCount === 0) {
             this.velocity = vec2(this.velocity.x, this.jumpSpeed);
             this.jumpCount += 1;
         }
     }
 
     public render() {
-        super.render();
-
         // Wag tail
         const tailBase = this.lastFrames[0] || this.pos;
         const tailLength = 10;
@@ -125,6 +122,8 @@ export class Cat extends EngineObject {
                 Colors.black, 0.05,
                 Colors.darker_grey)
         }
+
+        super.render();
 
     }
 }
@@ -347,7 +346,11 @@ export class WindowSillEnemy extends WindowSillBase {
 
 export class ClosedWindowSill extends WindowSillBase {
     private readonly type: number;
-    private readonly hasPlant: boolean;
+    protected readonly hasPlant: boolean;
+    protected lights: boolean;
+    protected reactTime: number
+    private someoneHome: boolean
+
 
     constructor(pos: Vector2, size: Vector2, random: RandomGenerator) {
         super(pos, size);
@@ -357,6 +360,9 @@ export class ClosedWindowSill extends WindowSillBase {
         this.type = Math.floor(Math.random() * 4) | WINDOW_TYPE_OPEN;
         this.color = Colors.clear
         this.hasPlant = false;
+        this.lights = false
+        this.reactTime = random.int(500, 1000)
+        this.someoneHome = random.int(0, 2) === 0
 
         // Create a plant on the window sill at a random cadence
         switch (random.int(0, 4)) {
@@ -382,7 +388,7 @@ export class ClosedWindowSill extends WindowSillBase {
                 drawRect(
                     vec2(this.pos.x, this.pos.y + 1.5),
                     vec2(this.size.x, this.size.y - 3),
-                    Colors.dark_grey, 0, false);
+                    this.lights ? Colors.lightsOn : Colors.dark_grey, 0, false);
                 drawLine(
                     vec2(this.pos.x - 1.25, this.pos.y + 1.5),
                     vec2(this.pos.x + 1.25, this.pos.y + 1.5),
@@ -396,7 +402,7 @@ export class ClosedWindowSill extends WindowSillBase {
                 drawRect(
                     vec2(this.pos.x, this.pos.y + 1.5),
                     vec2(this.size.x, this.size.y - 3),
-                    Colors.dark_grey,
+                    this.lights ? Colors.lightsOn : Colors.dark_grey,
                     0, false);
                 drawCircleSegment(
                     worldToScreen(vec2(this.pos.x - 1.25, this.pos.y + 2.75)),
@@ -415,7 +421,7 @@ export class ClosedWindowSill extends WindowSillBase {
                 drawRect(
                     vec2(this.pos.x, this.pos.y + 1.5),
                     vec2(this.size.x, this.size.y - 3),
-                    Colors.grey, 0, false);
+                    this.lights ? Colors.lightsOn : Colors.grey, 0, false);
         }
 
         drawRect(this.pos, this.size, Colors.white, 0, false)
@@ -433,11 +439,17 @@ export class ClosedWindowSill extends WindowSillBase {
     public doesHavePlant(): boolean {
         return this.hasPlant
     }
+
+    public collideWithObject(object: EngineObject): boolean {
+        if (object instanceof Cat && object.velocity.y < 0 && this.hasPlant && this.someoneHome) {
+            setTimeout(() => this.lights = true, this.reactTime)
+        }
+        return true
+    }
 }
 
-export class JumpScareEnemy extends ClosedWindowSill {
 
-    private lights: boolean;
+export class JumpScareEnemy extends ClosedWindowSill {
 
     constructor(pos: Vector2, size: Vector2, random: RandomGenerator) {
         super(pos, size, random);
@@ -464,7 +476,7 @@ export class JumpScareEnemy extends ClosedWindowSill {
 
     public collideWithObject(object: EngineObject): boolean {
         if (object instanceof Cat && object.velocity.y < 0) {
-            setTimeout(() => this.lights = true, 500)
+            setTimeout(() => this.lights = true, 750)
         }
         return true
     }

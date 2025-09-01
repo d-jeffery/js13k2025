@@ -5,7 +5,7 @@ import {
     tile,
     drawTile,
     vec2,
-    mouseIsDown, setCameraScale, Timer, setCameraPos, drawText, fontDefault, overlayContext, drawLine,
+    mouseIsDown, setCameraScale, Timer, setCameraPos, drawText, fontDefault, drawLine,
     drawRect, mainContext, worldToScreen, engineObjects, RandomGenerator,
 } from "littlejsengine";
 import {drawGradientCircle} from "./draw.ts";
@@ -130,7 +130,7 @@ export class GameScene extends Scene {
 
         this.cat = new Cat(vec2(0, -7.5));
 
-        this.building = new Building(new RandomGenerator(1337))
+        this.building = new Building(new RandomGenerator(2))
 
         this.countDown = new Timer(5);
         this.finished = false;
@@ -165,7 +165,9 @@ export class GameScene extends Scene {
         }
 
         if (this.countDown.elapsed() && this.catReached) {
-            if (catPosY - this.cameraOffset >= 10) {
+            if (this.cameraOffset >= 70) {
+                // Dont progresses camera if at "top"
+            } else if (catPosY - this.cameraOffset >= 10) {
                 // this.cameraOffset = lerp(this.lerpY, catPosY - 10, catPosY)
                 this.cameraOffset = catPosY - 10
             } else {
@@ -186,27 +188,23 @@ export class GameScene extends Scene {
     }
 
     public drawOverlay(): void {
-        drawRect(vec2(0, -11 + this.cameraOffset), vec2(15, 3.5), new Color(1, 1, 1, 1), 0, true);
+        drawRect(vec2(0, -11 + this.cameraOffset), vec2(15, 3.5), new Color(1, 1, 1, 1), 0, false);
 
-        drawRect(vec2(0, -11 + this.cameraOffset), vec2(13.5, 3), new Color(0, 0, 0, 1), 0, true);
+        drawRect(vec2(0, -11 + this.cameraOffset), vec2(13.5, 3), new Color(0, 0, 0, 1), 0, false);
 
         drawText("Smashables: " + this.cat.getScore() + "/" + this.building.getPlantCount(),
             vec2(0, -10.5 + this.cameraOffset),
             0.8, Colors.yellow,
             0.2, new Color(0, 0, 0, 1),
             'center',
-            fontDefault,
-            undefined,
-            overlayContext);
+            fontDefault);
 
         drawText("Lives: " + this.cat.getLives(),
             vec2(0, -11.5 + this.cameraOffset),
             0.8, Colors.yellow,
             0.2, new Color(0, 0, 0, 1),
             'center',
-            fontDefault,
-            undefined,
-            overlayContext);
+            fontDefault);
     }
 
     public draw(): void {

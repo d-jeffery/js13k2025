@@ -18,7 +18,7 @@ export class Building {
         this.windows.push(new ClosedWindowSill(vec2(-posx, -posy), vec2(width, height), randomGenerator));
         this.windows.push(new ClosedWindowSill(vec2(posx, -posy), vec2(width, height), randomGenerator));
 
-        const levels = [0, 1, 0, 1, 1, 1, 0, 2, 0, 3, 1, 4, 6];
+        const levels = [0, 1, 0, 1, 1, 1, 0, 2, 0, 3, 1, 4, 1, 6];
         for (const [index, level] of levels.entries()) {
             this.windows.push(...WindowConfigs[level](posx, posy * index, width, height, randomGenerator));
         }

@@ -90,6 +90,7 @@ setTouchGamepadAnalog(true)
 setTouchGamepadSize(175)
 setGamepadsEnable(true)
 glSetAntialias( false)
+
 // setGlEnable(true)
 
 
