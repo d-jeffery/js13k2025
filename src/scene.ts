@@ -150,12 +150,12 @@ export class GameScene extends Scene {
     }
 
     public update(): void {
-        this.cat.update()
+        // this.cat.update()
 
         const catPos = worldToScreen(this.cat.pos)
 
         // End the scene if the cat goes off the bottom of the screen
-        if (catPos.y > 1280) {
+        if (catPos.y > 1180) {
             this.finished = true;
         }
 
@@ -210,7 +210,7 @@ export class GameScene extends Scene {
     }
 
     public draw(): void {
-        drawRect(vec2(0, 2 + this.cameraOffset), vec2(14, 23), new Color(0.1, 0.1, 0.1, 1), 0, false);
+        drawRect(vec2(0, 2 + this.cameraOffset), vec2(14, 23), Colors.darker_grey, 0, false);
 
         // Draw building outline
         drawLine(vec2(-7, -8.5), vec2(-7, 13 + this.cameraOffset), 0.1, Colors.white, false)

@@ -1,9 +1,9 @@
 import {
     cameraPos,
-    Color, drawCircle, drawEllipse, drawLine, drawPoly,
+    drawCircle, drawEllipse, drawLine, drawPoly,
     drawRect, drawText,
     EngineObject, fontDefault, gamepadStick, gamepadWasPressed, gamepadWasReleased, isUsingGamepad, keyDirection,
-    keyWasPressed, keyWasReleased, mainContext, RandomGenerator,
+    keyWasPressed, keyWasReleased, mainContext, ParticleEmitter, RandomGenerator,
     tile, time, Timer, vec2, type Vector2, worldToScreen
 } from "littlejsengine";
 import {drawCircleSegment} from "./draw.ts";
@@ -13,6 +13,8 @@ import {Colors} from "./utils.ts";
 const BACKGROUND_LAYER = 0;
 const CAT_LAYER = 1;
 const DESTRUCTIBLE_LAYER = 2;
+const WATER_LAYER = 3;
+
 
 // The player-controlled cat
 export class Cat extends EngineObject {
@@ -29,13 +31,19 @@ export class Cat extends EngineObject {
 
         this.tileInfo = tile(0, 16)
         this.setCollision()
-        this.speed = 0.08;
-        this.jumpSpeed = 0.3
+        // this.speed = 0.08
+        // this.jumpSpeed = 0.
+        // this.friction = 0.1;
+
+        this.friction = 0.2;
+        this.speed = 0.14;
+        this.jumpSpeed = 0.5;
+        this.gravityScale = 2.8;
+
         this.canDoubleJump = false
         this.jumpCount = 0;
         this.renderOrder = CAT_LAYER;
         this.score = 0;
-        this.friction = 0.1;
         this.lives = 9;
         this.lastFrames = []
     }
@@ -60,7 +68,7 @@ export class Cat extends EngineObject {
         super.update()
 
         this.lastFrames.push(this.pos.copy())
-        if (this.lastFrames.length > 10) {
+        if (this.lastFrames.length > 6) {
             this.lastFrames.shift()
         }
 
@@ -92,13 +100,6 @@ export class Cat extends EngineObject {
     public render() {
         super.render();
 
-        for (let f of this.lastFrames) {
-            drawCircle(vec2(f.x, f.y - 0.05),
-                (0.5),
-                Colors.black, 0.05,
-                new Color(0.1, 0.1, 0.1, 1))
-        }
-
         // Wag tail
         const tailBase = this.lastFrames[0] || this.pos;
         const tailLength = 10;
@@ -115,7 +116,14 @@ export class Cat extends EngineObject {
             const x = tailBase.x - Math.sin(angle) * tailSegmentLength * i;
             const y = tailBase.y + 0.1 * i;
 
-            drawCircle(vec2(x, y), 0.1 * (1 - t * 0.5), Colors.black, 0.01, new Color(0.1, 0.1, 0.1, 1));
+            drawCircle(vec2(x, y), 0.1 * (1 - t * 0.5), Colors.black, 0.01, Colors.darker_grey);
+        }
+
+        for (let f of this.lastFrames) {
+            drawCircle(vec2(f.x, f.y - 0.05),
+                (0.5),
+                Colors.black, 0.05,
+                Colors.darker_grey)
         }
 
     }
@@ -181,10 +189,8 @@ class Water extends EngineObject {
         this.tileInfo = tile(4, 16);
         this.setCollision()
         this.mass = 0.01
-        this.renderOrder = CAT_LAYER
-        this.color =  new Color(0, 0, 1, 0.5)
-        // this.setCollision(false, true)
-
+        this.renderOrder = WATER_LAYER
+        this.color = Colors.waterBlue
     }
 
     public render(): void {
@@ -192,12 +198,19 @@ class Water extends EngineObject {
         for (let i = 0; i < 5; i++) {
             drawCircle(vec2(this.pos.x, this.pos.y + (0.25 * i)),
                 (0.5 - (0.1 * i)),
-                new Color(0, 0, 1, 0.5), 0, )
+                Colors.waterBlue, 0,)
         }
     }
 
     public collideWithObject(object: EngineObject): boolean {
         if (object instanceof Cat) {
+
+            const emitter = new ParticleEmitter(object.pos, 0, 0, 0, 100, 3.14, tile(4, 16),
+                Colors.waterBlue, Colors.waterBlue, Colors.whiteNoAlpha, Colors.whiteNoAlpha,
+                0.5, 1, 0.1, 0.1, 0.05, 1, 1, 0, 3.14, 0.1, 0.2, false, false, true);
+
+            setTimeout(() => emitter.destroy(), 250)
+
             object.damage();
             this.destroy()
             return true;
@@ -208,7 +221,6 @@ class Water extends EngineObject {
         return false;
     }
 }
-
 
 export class Ground extends EngineObject {
     constructor(pos: Vector2, size: Vector2) {
@@ -222,24 +234,8 @@ const WINDOW_TYPE_OPEN = 0;
 const WINDOW_TYPE_CLOSE = 1;
 const WINDOW_WITH_DRAPES = 2;
 
-
 const STATE_TIME = 2.5
 const BUCKET_STATE = 2.5
-
-/*export class JumpScareEnemy extends EngineObject {
-    private lights: boolean;
-    private stateHidden: boolean;
-    constructor(pos: Vector2, size: Vector2) {
-        super(pos, size);
-        this.setCollision();
-        this.mass = 0;
-        this.renderOrder = BACKGROUND_LAYER;
-        this.lights = false
-        this.stateHidden = true
-    }
-
-}*/
-
 
 export abstract class WindowSillBase extends EngineObject {
     constructor(pos: Vector2, size: Vector2) {
@@ -249,10 +245,6 @@ export abstract class WindowSillBase extends EngineObject {
         this.renderOrder = BACKGROUND_LAYER;
         this.color = Colors.clear
     }
-
-    abstract render(): void;
-
-    abstract update(): void;
 
     abstract doesHavePlant(): boolean;
 }
@@ -292,30 +284,30 @@ export class WindowSillEnemy extends WindowSillBase {
 
         drawLine(
             vec2(this.pos.x - 0.05, this.pos.y + 2.25),
-            vec2(this.pos.x - 0.25 , this.pos.y + 2.45), 0.1,
-            Colors.dark_grey,  false)
+            vec2(this.pos.x - 0.25, this.pos.y + 2.45), 0.1,
+            Colors.dark_grey, false)
 
         if (!this.state) {
             drawPoly([
-                    vec2(this.pos.x-0.75, this.pos.y+1.5),
-                    vec2(this.pos.x-0.5, this.pos.y + 0.5),
+                    vec2(this.pos.x - 0.75, this.pos.y + 1.5),
+                    vec2(this.pos.x - 0.5, this.pos.y + 0.5),
                     vec2(this.pos.x + 0.5, this.pos.y + 0.5),
                     vec2(this.pos.x + 0.75, this.pos.y + 1.5)
                 ],
                 Colors.dark_grey)
         } else {
             drawPoly([
-                    vec2(this.pos.x-0.5, this.pos.y+1.5),
-                    vec2(this.pos.x-0.75, this.pos.y + 0.5),
+                    vec2(this.pos.x - 0.5, this.pos.y + 1.5),
+                    vec2(this.pos.x - 0.75, this.pos.y + 0.5),
                     vec2(this.pos.x + 0.75, this.pos.y + 0.5),
                     vec2(this.pos.x + 0.5, this.pos.y + 1.5)
                 ],
                 Colors.dark_grey)
         }
 
-        drawCircle(vec2(this.pos.x-0.5, this.pos.y + 1), 0.25,
+        drawCircle(vec2(this.pos.x - 0.5, this.pos.y + 1), 0.25,
             Colors.skin)
-        drawCircle(vec2(this.pos.x+0.5, this.pos.y + 1), 0.25,
+        drawCircle(vec2(this.pos.x + 0.5, this.pos.y + 1), 0.25,
             Colors.skin)
 
         drawRect(this.pos, this.size, Colors.white, 0, false)
@@ -327,6 +319,8 @@ export class WindowSillEnemy extends WindowSillBase {
     }
 
     public update() {
+        super.update()
+
         if (this.pos.y - 20 > cameraPos.y) {
             return
         }
@@ -339,7 +333,7 @@ export class WindowSillEnemy extends WindowSillBase {
             new Water(this.pos)
 
             // water.color = new Color(0.5, 0.5, 1, 1)
-        } else if (this.bucketTimer.isSet() &&  this.bucketTimer.elapsed()) {
+        } else if (this.bucketTimer.isSet() && this.bucketTimer.elapsed()) {
             this.state = false
             this.stateTimer.set(STATE_TIME)
             this.bucketTimer.unset()
@@ -348,63 +342,6 @@ export class WindowSillEnemy extends WindowSillBase {
 
     public doesHavePlant(): boolean {
         return false
-    }
-}
-
-export class PentHouse extends WindowSillBase {
-
-    constructor(pos: Vector2, size: Vector2) {
-        super(pos, size);
-    }
-    public render(): void {
-        drawRect(
-            vec2(this.pos.x, this.pos.y + 1.5),
-            vec2(this.size.x, this.size.y - 3),
-            Colors.lightsOn,
-            0, false);
-        drawCircleSegment(
-            worldToScreen(vec2(this.pos.x-3.75, this.pos.y+2.75)),
-            45,
-            0,
-            Math.PI/2,
-            Colors.grey)
-        drawCircleSegment(
-            worldToScreen(vec2(this.pos.x+3.75, this.pos.y+2.75)),
-            45,
-            Math.PI/2,
-            Math.PI,
-            Colors.grey)
-
-        drawRect(this.pos, this.size, Colors.white, 0, false)
-
-        drawLine(
-            vec2(this.pos.x - 3.75, this.pos.y + 1.5),
-            vec2(this.pos.x + 3.75, this.pos.y + 1.5),
-            0.2, Colors.white, false)
-
-        drawLine(
-            vec2(this.pos.x, this.pos.y + 2.75),
-            vec2(this.pos.x, this.pos.y + 1.375),
-            0.1, Colors.white, false);
-
-        drawLine(
-            vec2(this.pos.x - 4.25, this.pos.y + 3),
-            vec2(this.pos.x + 4.25, this.pos.y + 3),
-            0.1, Colors.white, false)
-
-        drawText("Home, Sweet Home!",
-            vec2(this.pos.x, this.pos.y + 3.5), 0.8, Colors.yellow,
-            0.1, Colors.black,
-            'center',
-            fontDefault,
-            undefined,
-            mainContext);
-    }
-    public update(): void {
-    }
-
-    public doesHavePlant(): boolean {
-       return false
     }
 }
 
@@ -461,18 +398,18 @@ export class ClosedWindowSill extends WindowSillBase {
                     vec2(this.size.x, this.size.y - 3),
                     Colors.dark_grey,
                     0, false);
-                 drawCircleSegment(
-                     worldToScreen(vec2(this.pos.x-1.25, this.pos.y+2.75)),
-                     45,
-                     0,
-                     Math.PI/2,
-                     Colors.grey)
-                 drawCircleSegment(
-                     worldToScreen(vec2(this.pos.x+1.25, this.pos.y+2.75)),
-                     45,
-                     Math.PI/2,
-                     Math.PI,
-                     Colors.grey)
+                drawCircleSegment(
+                    worldToScreen(vec2(this.pos.x - 1.25, this.pos.y + 2.75)),
+                    45,
+                    0,
+                    Math.PI / 2,
+                    Colors.grey)
+                drawCircleSegment(
+                    worldToScreen(vec2(this.pos.x + 1.25, this.pos.y + 2.75)),
+                    45,
+                    Math.PI / 2,
+                    Math.PI,
+                    Colors.grey)
                 break;
             default:
                 drawRect(
@@ -490,10 +427,105 @@ export class ClosedWindowSill extends WindowSillBase {
     }
 
     public update() {
-        // No update needed for closed windows
+        super.update()
     }
 
     public doesHavePlant(): boolean {
         return this.hasPlant
+    }
+}
+
+export class JumpScareEnemy extends ClosedWindowSill {
+
+    private lights: boolean;
+
+    constructor(pos: Vector2, size: Vector2, random: RandomGenerator) {
+        super(pos, size, random);
+        this.lights = false
+    }
+
+    public update() {
+        super.update()
+    }
+
+    public render() {
+        drawRect(
+            vec2(this.pos.x, this.pos.y + 1.5),
+            vec2(this.size.x, this.size.y - 3),
+            this.lights ? Colors.lightsOn : Colors.grey, 0, false);
+
+        drawLine(
+            vec2(this.pos.x - 1.5, this.pos.y + 3),
+            vec2(this.pos.x + 1.5, this.pos.y + 3),
+            0.1, Colors.white, false)
+
+        drawRect(this.pos, this.size, Colors.white, 0, false)
+    }
+
+    public collideWithObject(object: EngineObject): boolean {
+        if (object instanceof Cat && object.velocity.y < 0) {
+            setTimeout(() => this.lights = true, 500)
+        }
+        return true
+    }
+}
+
+export class PentHouse extends WindowSillBase {
+
+    constructor(pos: Vector2, size: Vector2) {
+        super(pos, size);
+    }
+
+    public render(): void {
+        drawRect(
+            vec2(this.pos.x, this.pos.y + 1.5),
+            vec2(this.size.x, this.size.y - 3),
+            Colors.lightsOn,
+            0, false);
+        drawCircleSegment(
+            worldToScreen(vec2(this.pos.x - 3.75, this.pos.y + 2.75)),
+            45,
+            0,
+            Math.PI / 2,
+            Colors.grey)
+        drawCircleSegment(
+            worldToScreen(vec2(this.pos.x + 3.75, this.pos.y + 2.75)),
+            45,
+            Math.PI / 2,
+            Math.PI,
+            Colors.grey)
+
+        drawRect(this.pos, this.size, Colors.white, 0, false)
+
+        drawLine(
+            vec2(this.pos.x - 3.75, this.pos.y + 1.5),
+            vec2(this.pos.x + 3.75, this.pos.y + 1.5),
+            0.2, Colors.white, false)
+
+        drawLine(
+            vec2(this.pos.x, this.pos.y + 2.75),
+            vec2(this.pos.x, this.pos.y + 1.375),
+            0.1, Colors.white, false);
+
+        drawLine(
+            vec2(this.pos.x - 4.25, this.pos.y + 3),
+            vec2(this.pos.x + 4.25, this.pos.y + 3),
+            0.1, Colors.white, false)
+
+        drawText("Home, Sweet Home!",
+            vec2(this.pos.x, this.pos.y + 3.5), 0.8, Colors.yellow,
+            0.1, Colors.black,
+            'center',
+            fontDefault,
+            undefined,
+            mainContext);
+    }
+
+    public update(): void {
+        super.update()
+    }
+
+    public doesHavePlant(): boolean {
+        return false
     }
 }

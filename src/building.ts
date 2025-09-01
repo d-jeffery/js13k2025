@@ -1,5 +1,5 @@
 import {RandomGenerator, vec2} from "littlejsengine";
-import {ClosedWindowSill, PentHouse, WindowSillBase, WindowSillEnemy} from "./sprites.ts";
+import {ClosedWindowSill, JumpScareEnemy, PentHouse, WindowSillBase, WindowSillEnemy} from "./sprites.ts";
 
 export class Building {
 
@@ -18,7 +18,7 @@ export class Building {
         this.windows.push(new ClosedWindowSill(vec2(-posx, -posy), vec2(width, height), randomGenerator));
         this.windows.push(new ClosedWindowSill(vec2(posx, -posy), vec2(width, height), randomGenerator));
 
-        const levels = [0, 1, 0, 1, 1, 1, 0, 2, 0, 3, 1, 4, 5];
+        const levels = [0, 1, 0, 1, 1, 1, 0, 2, 0, 3, 1, 4, 6];
         for (const [index, level] of levels.entries()) {
             this.windows.push(...WindowConfigs[level](posx, posy * index, width, height, randomGenerator));
         }
@@ -69,7 +69,14 @@ const WindowConfigs: windowConfigOptions = {
             new WindowSillEnemy(vec2(posx, posy), vec2(width, height)),
         ]
     },
-    5: (_: number, posy: number, width: number, height: number): WindowSillBase[] => {
+    5: (posx: number, posy: number, width: number, height: number, random: RandomGenerator): WindowSillBase[] => {
+        return [
+            new ClosedWindowSill(vec2(-posx, posy), vec2(width, height), random),
+            new ClosedWindowSill(vec2(0, posy), vec2(width, height), random),
+            new JumpScareEnemy(vec2(posx, posy), vec2(width, height), random)
+        ]
+    },
+    6: (_: number, posy: number, width: number, height: number): WindowSillBase[] => {
         return [
             new PentHouse(vec2(0, posy), vec2(width * 3, height)),
         ]
