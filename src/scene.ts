@@ -1,18 +1,20 @@
 import {
     Color,
-    FontImage,
     time,
     tile,
     drawTile,
     vec2,
     mouseIsDown, setCameraScale, Timer, setCameraPos, drawText, fontDefault, drawLine,
-    drawRect, mainContext, worldToScreen, engineObjects, RandomGenerator,
+    drawRect, mainContext, worldToScreen, engineObjects, RandomGenerator, mousePos,
 } from "littlejsengine";
 import {drawGradientCircle} from "./draw.ts";
 import {Cat, Ground, PentHouse} from "./sprites.ts";
 import {Building} from "./building.ts";
 import {Colors} from "./utils.ts";
+import {Button} from "./button.ts";
 
+
+// Base class for all scenes
 export abstract class Scene {
     public abstract update(): void
 
@@ -45,6 +47,7 @@ fontImage.onload = () => {
 };
 */
 
+let seed = 2;
 
 export class IntroScene extends Scene {
 
@@ -53,54 +56,46 @@ export class IntroScene extends Scene {
     private offsetY: number;
     protected finished: boolean;
 
+    private playerIntroButton: Button
+    private playerEndlessButton: Button
+
     public constructor() {
         super();
         this.catImg.src = "./black_cat.png";
         // this.fontImg.src = "./Quirk.png";
         this.offsetY = 0
         this.finished = false
+
+        this.playerIntroButton = new Button("Play Intro Level", vec2(0, -6), vec2(14, 2))
+        this.playerEndlessButton = new Button("Play Endless Mode", vec2(0, -9), vec2(14, 2))
     }
 
     public update(): void {
         this.offsetY = Math.sin(time)
 
-        if (mouseIsDown(0)) {
+        if (this.playerIntroButton.isClicked(mousePos, mouseIsDown(0))) {
+            this.finished = true;
+        }
+
+        if (this.playerEndlessButton.isClicked(mousePos, mouseIsDown(0))) {
             this.finished = true;
         }
     }
 
     public draw(): void {
-        drawGradientCircle(vec2(0, -this.offsetY), 4, new Color(0, 0, 0, 0.5), new Color(1, 1, 1, 1), 30);
-        // drawCircle(new Vector2(0, -0.5 - this.offsetY), 2.8, new Color(1, 1, 1, 1))
-
+        drawGradientCircle(vec2(0, -this.offsetY), 4, new Color(0, 0, 0, 0.5), Colors.white, 30);
         drawTile(vec2(0, -this.offsetY), vec2(5, 5), tile(0, 16));
-
-
-        /*        drawText("Miss\nFortune",
-                    vec2(0, 7),
-                    16, Colors.yellow,
-                    0.2, new Color(0, 0, 0, 1),
-                    'center',
-                    'assets/awesome_9.png',
-                    undefined,
-                    overlayContext);
-
-                // const font = new FontImage(this.fontImg, vec2(16, 16), vec2(0, 0));
-                drawText("Click to\nPlay",
-                    vec2(0, -5), 16, Colors.yellow,
-                    0.2, new Color(0, 0, 0, 1),
-                    'center',
-                    'assets/awesome_9.png',
-                    undefined
-                    , overlayContext);*/
-
     }
 
     public drawOverlay() {
+
         // const font = new FontImage(this.fontImg, vec2(16, 16), vec2(0, 0));
-        const font = new FontImage
-        font.drawText("Miss\nFortune", vec2(0, 7), 0.2, true)
-        font.drawText("Click to\nPlay", vec2(0, -5), 0.1, true)
+        drawText("Miss\nFortune", vec2(0, 7), 3, Colors.yellow);
+
+        this.playerIntroButton.draw()
+        this.playerEndlessButton.draw()
+
+        drawText(`Seed: ${seed}`, vec2(0, -12), 1.5, Colors.white)
     }
 
     public isFinished(): boolean {
@@ -220,12 +215,12 @@ export class GameScene extends Scene {
 
         drawRect(vec2(0, -5.75), vec2(4, -5.5), Colors.brown, 0, false)
         drawLine(vec2(-2, -3), vec2(2, -3), 0.1, Colors.white, false)
-        drawLine(vec2(0, -8.5), vec2(0, -3), 0.1, Colors.white,false)
-        drawLine(vec2(2, -8.5), vec2(2, -3), 0.1, Colors.white,false)
-        drawLine(vec2(-2, -8.5), vec2(-2, -3), 0.1, Colors.white,false)
+        drawLine(vec2(0, -8.5), vec2(0, -3), 0.1, Colors.white, false)
+        drawLine(vec2(2, -8.5), vec2(2, -3), 0.1, Colors.white, false)
+        drawLine(vec2(-2, -8.5), vec2(-2, -3), 0.1, Colors.white, false)
 
-        drawLine(vec2(0.5, -5), vec2(0.5, -6), 0.1, Colors.yellow,false)
-        drawLine(vec2(-0.5, -5), vec2(-0.5, -6), 0.1, Colors.yellow,false)
+        drawLine(vec2(0.5, -5), vec2(0.5, -6), 0.1, Colors.yellow, false)
+        drawLine(vec2(-0.5, -5), vec2(-0.5, -6), 0.1, Colors.yellow, false)
 
         // const font = new FontImage(this.fontImg, vec2(16, 16), vec2(0, 0));
         drawText("Locked out again!",
