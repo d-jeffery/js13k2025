@@ -8,7 +8,6 @@
 'use strict';
 
 import {
-    engineAddPlugin,
     engineInit,
     glSetAntialias, setCameraPos,
     setCanvasFixedSize, setGamepadsEnable,
@@ -17,21 +16,6 @@ import {
     vec2
 } from 'littlejsengine';
 import {EndScene, GameScene, IntroScene, Scene} from "./scene.ts";
-// import {initPostProcess} from "./postProcessing.ts";
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 const HEIGHT = 1280;
 const WIDTH = 720;
@@ -105,7 +89,7 @@ setTouchGamepadAnalog(true)
 setTouchGamepadSize(175)
 setGamepadsEnable(true)
 glSetAntialias( false)
-engineAddPlugin()
+// engineAddPlugin()
 
 // setGlEnable(true)
 

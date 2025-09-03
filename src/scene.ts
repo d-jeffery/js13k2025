@@ -5,7 +5,7 @@ import {
     drawTile,
     vec2,
     mouseIsDown, setCameraScale, Timer, setCameraPos, drawText, fontDefault, drawLine,
-    drawRect, mainContext, worldToScreen, engineObjects, RandomGenerator, mousePos,
+    drawRect, mainContext, worldToScreen, engineObjects, RandomGenerator, mousePos, mouseWasPressed,
 } from "littlejsengine";
 import {drawGradientCircle} from "./draw.ts";
 import {Cat, Ground, PentHouse} from "./sprites.ts";
@@ -58,6 +58,15 @@ export class IntroScene extends Scene {
 
     private playerIntroButton: Button
     private playerEndlessButton: Button
+    private seedUpButton: Button
+    private seedDownButton: Button
+
+    // private font: FontImage;
+
+    // private lerpY: number;
+
+    // private rain: ParticleEmitter;
+    // private lerpFactor: number = 0
 
     public constructor() {
         super();
@@ -68,6 +77,8 @@ export class IntroScene extends Scene {
 
         this.playerIntroButton = new Button("Play Intro Level", vec2(0, -6), vec2(14, 2))
         this.playerEndlessButton = new Button("Play Endless Mode", vec2(0, -9), vec2(14, 2))
+        this.seedUpButton = new Button(">", vec2(4, -12), vec2(1, 2))
+        this.seedDownButton = new Button("<", vec2(-4, -12), vec2(1, 2))
     }
 
     public update(): void {
@@ -75,11 +86,15 @@ export class IntroScene extends Scene {
 
         if (this.playerIntroButton.isClicked(mousePos, mouseIsDown(0))) {
             this.finished = true;
+        } else if (this.playerEndlessButton.isClicked(mousePos, mouseIsDown(0))) {
+            this.finished = true;
+        } else if (this.seedDownButton.isClicked(mousePos, mouseWasPressed(0))) {
+            seed--;
+        } else if (this.seedUpButton.isClicked(mousePos, mouseWasPressed(0))) {
+            seed++
         }
 
-        if (this.playerEndlessButton.isClicked(mousePos, mouseIsDown(0))) {
-            this.finished = true;
-        }
+
     }
 
     public draw(): void {
@@ -96,6 +111,9 @@ export class IntroScene extends Scene {
         this.playerEndlessButton.draw()
 
         drawText(`Seed: ${seed}`, vec2(0, -12), 1.5, Colors.white)
+
+        this.seedUpButton.draw()
+        this.seedDownButton.draw()
     }
 
     public isFinished(): boolean {
@@ -125,7 +143,7 @@ export class GameScene extends Scene {
 
         this.cat = new Cat(vec2(0, -7.5));
 
-        this.building = new Building(new RandomGenerator(2))
+        this.building = new Building(new RandomGenerator(seed))
 
         this.countDown = new Timer(5);
         this.finished = false;
