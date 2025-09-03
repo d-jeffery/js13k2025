@@ -15,7 +15,7 @@ import {
     setTouchGamepadEnable, setTouchGamepadSize,
     vec2
 } from 'littlejsengine';
-import {EndScene, GameScene, IntroScene, Scene} from "./scene.ts";
+import {IntroScene, Scene} from "./scene.ts";
 
 const HEIGHT = 1280;
 const WIDTH = 720;
@@ -55,7 +55,11 @@ function gameUpdate() {
     }
 
     currentScene.clean()
+    setCameraPos(vec2(0, 0));
+    // setCameraScale(35)
 
+    currentScene = currentScene.getNextScene()
+/*
     if (currentScene instanceof IntroScene) {
         currentScene = new GameScene();
     } else if (currentScene instanceof GameScene) {
@@ -64,7 +68,7 @@ function gameUpdate() {
     } else if (currentScene instanceof EndScene) {
         setCameraPos(vec2(0, 0));
         currentScene = new GameScene()
-    }
+    }*/
 }
 
 ///////////////////////////////////////////////////////////////////////////////

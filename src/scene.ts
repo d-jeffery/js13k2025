@@ -16,11 +16,15 @@ import {Button} from "./button.ts";
 
 // Base class for all scenes
 export abstract class Scene {
+    protected nextScene: Scene | undefined;
+
     public abstract update(): void
 
     public abstract draw(): void
 
     public abstract drawOverlay(): void;
+
+    public abstract getNextScene(): Scene
 
     public abstract isFinished(): boolean
 
@@ -55,6 +59,7 @@ export class IntroScene extends Scene {
     //private fontImg: HTMLImageElement = new Image();
     private offsetY: number;
     protected finished: boolean;
+    protected nextScene: Scene | undefined;
 
     private playerIntroButton: Button
     private playerEndlessButton: Button
@@ -79,6 +84,21 @@ export class IntroScene extends Scene {
         this.playerEndlessButton = new Button("Play Endless Mode", vec2(0, -3), vec2(14, 2))
         this.seedUpButton = new Button(">", vec2(5, -6), vec2(2, 2))
         this.seedDownButton = new Button("<", vec2(-5, -6), vec2(2, 2))
+
+        this.nextScene = undefined;
+
+        // this.font = new FontImage(this.fontImg, vec2(16, 16), vec2(0, 0));
+
+        // this.rain = new ParticleEmitter(vec2(6, 14), (5/4) * Math.PI, vec2(24,1), 0, 150, 0, tile(3, 16),
+        //     new Color(0.57, 0.72, 0.82, 0.75),
+        //     new Color(0.57, 0.72, 0.82, 0.75),
+        //     new Color(0.77, 0.88, 0.96, 0.5),
+        //     new Color(0.77, 0.88, 0.96, 0.5),
+        //     2, 0.15, 0.1, 0.25, 0.05, 1, 1, 1, 3.14, 0.1, 0.25, false, false);
+
+        // this.rain.renderOrder = 3
+
+        // setCameraScale(50)
     }
 
     public update(): void {
@@ -117,6 +137,10 @@ export class IntroScene extends Scene {
         this.seedDownButton.draw()
     }
 
+    public getNextScene(): Scene {
+        return this.nextScene || new GameScene();
+    }
+
     public isFinished(): boolean {
         return this.finished;
     }
@@ -150,6 +174,7 @@ export class GameScene extends Scene {
         this.finished = false;
         this.cameraOffset = 0
         this.catReached = false;
+        this.nextScene = undefined;
         /*
                 this.rain = new ParticleEmitter(vec2(6, 14), (5/4) * Math.PI, vec2(24,1), 0, 150, 0, tile(3, 16),
                     new Color(0.57, 0.72, 0.82, 0.75),
@@ -267,12 +292,17 @@ export class GameScene extends Scene {
             mainContext);
     }
 
+    public getNextScene(): Scene {
+        return new EndScene()
+    }
+
     public isFinished(): boolean {
         return this.finished
     }
 
     public clean(): void {
         engineObjects.forEach(e => e.destroy())
+        setCameraScale(35)
     }
 
 }
@@ -288,13 +318,15 @@ export class EndScene extends Scene {
 
         this.finished = false
 
-        this.restartButton = new Button("Restart", vec2(0, -2), vec2(14, 2));
-        this.mainMenuButton = new Button("Main Menu", vec2(0, -5), vec2(14, 2));
+        this.restartButton = new Button("Restart", vec2(0, 0), vec2(14, 2));
+        this.mainMenuButton = new Button("Main Menu", vec2(0, -3), vec2(14, 2));
+
+        this.nextScene = undefined
     }
 
     public draw(): void {
         drawText("Game Over!",
-            vec2(0, 3), 1.2, Colors.yellow,
+            vec2(0, 6), 2.4, Colors.yellow,
             0.1, Colors.black,
             'center');
 
@@ -305,18 +337,20 @@ export class EndScene extends Scene {
     public drawOverlay(): void {
     }
 
+    public getNextScene(): Scene {
+        return this.nextScene || new IntroScene();
+    }
+
     public isFinished(): boolean {
         return this.finished;
     }
 
     public update(): void {
-        if (mouseIsDown(0)) {
-            this.finished = true;
-        }
-
         if (this.restartButton.isClicked(mousePos, mouseIsDown(0))) {
+            this.nextScene = new GameScene()
             this.finished = true;
         } else if (this.mainMenuButton.isClicked(mousePos, mouseIsDown(0))) {
+            this.nextScene = new IntroScene()
             this.finished = true;
         }
     }
