@@ -5,7 +5,7 @@ import {
     drawTile,
     vec2,
     mouseIsDown, setCameraScale, Timer, setCameraPos, drawText, fontDefault, drawLine,
-    drawRect, mainContext, worldToScreen, engineObjects, RandomGenerator, mousePos, mouseWasPressed,
+    drawRect, mainContext, worldToScreen, engineObjects, RandomGenerator, mousePos, mouseWasPressed
 } from "littlejsengine";
 import {drawGradientCircle} from "./draw.ts";
 import {Cat, Ground, PentHouse} from "./sprites.ts";
@@ -75,10 +75,10 @@ export class IntroScene extends Scene {
         this.offsetY = 0
         this.finished = false
 
-        this.playerIntroButton = new Button("Play Intro Level", vec2(0, -6), vec2(14, 2))
-        this.playerEndlessButton = new Button("Play Endless Mode", vec2(0, -9), vec2(14, 2))
-        this.seedUpButton = new Button(">", vec2(4, -12), vec2(1, 2))
-        this.seedDownButton = new Button("<", vec2(-4, -12), vec2(1, 2))
+        this.playerIntroButton = new Button("Play Intro Level", vec2(0, 0), vec2(14, 2))
+        this.playerEndlessButton = new Button("Play Endless Mode", vec2(0, -3), vec2(14, 2))
+        this.seedUpButton = new Button(">", vec2(5, -6), vec2(2, 2))
+        this.seedDownButton = new Button("<", vec2(-5, -6), vec2(2, 2))
     }
 
     public update(): void {
@@ -90,27 +90,28 @@ export class IntroScene extends Scene {
             this.finished = true;
         } else if (this.seedDownButton.isClicked(mousePos, mouseWasPressed(0))) {
             seed--;
+            if (seed < 0) {
+                seed = 0;
+            }
         } else if (this.seedUpButton.isClicked(mousePos, mouseWasPressed(0))) {
             seed++
         }
-
-
     }
 
     public draw(): void {
-        drawGradientCircle(vec2(0, -this.offsetY), 4, new Color(0, 0, 0, 0.5), Colors.white, 30);
-        drawTile(vec2(0, -this.offsetY), vec2(5, 5), tile(0, 16));
+        drawGradientCircle(vec2(0, -this.offsetY + 6), 4, new Color(0, 0, 0, 0.5), Colors.white, 30);
+        drawTile(vec2(0, -this.offsetY + 6), vec2(5, 5), tile(0, 16));
     }
 
     public drawOverlay() {
 
         // const font = new FontImage(this.fontImg, vec2(16, 16), vec2(0, 0));
-        drawText("Miss\nFortune", vec2(0, 7), 3, Colors.yellow);
+        drawText("Miss\nFortune", vec2(0, 13), 3, Colors.yellow);
 
         this.playerIntroButton.draw()
         this.playerEndlessButton.draw()
 
-        drawText(`Seed: ${seed}`, vec2(0, -12), 1.5, Colors.white)
+        drawText(`Seed: ${seed}`, vec2(0, -6), 1.5, Colors.white)
 
         this.seedUpButton.draw()
         this.seedDownButton.draw()
@@ -279,21 +280,26 @@ export class GameScene extends Scene {
 export class EndScene extends Scene {
 
     protected finished: boolean;
+    private restartButton: Button;
+    private mainMenuButton: Button;
 
     constructor() {
         super();
 
         this.finished = false
+
+        this.restartButton = new Button("Restart", vec2(0, -2), vec2(14, 2));
+        this.mainMenuButton = new Button("Main Menu", vec2(0, -5), vec2(14, 2));
     }
 
     public draw(): void {
-        drawText("Game Over!\nClick to Restart",
-            vec2(0, 3), 0.8, Colors.yellow,
+        drawText("Game Over!",
+            vec2(0, 3), 1.2, Colors.yellow,
             0.1, Colors.black,
-            'center',
-            fontDefault,
-            undefined,
-            mainContext);
+            'center');
+
+        this.restartButton.draw()
+        this.mainMenuButton.draw()
     }
 
     public drawOverlay(): void {
@@ -305,6 +311,12 @@ export class EndScene extends Scene {
 
     public update(): void {
         if (mouseIsDown(0)) {
+            this.finished = true;
+        }
+
+        if (this.restartButton.isClicked(mousePos, mouseIsDown(0))) {
+            this.finished = true;
+        } else if (this.mainMenuButton.isClicked(mousePos, mouseIsDown(0))) {
             this.finished = true;
         }
     }

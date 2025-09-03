@@ -116,7 +116,7 @@ export class Cat extends EngineObject {
             drawCircle(vec2(x, y), 0.1 * (1 - t * 0.5), Colors.black, 0.01, Colors.darker_grey);
         }
 
-        for (let f of this.lastFrames) {
+        for (const f of this.lastFrames) {
             drawCircle(vec2(f.x, f.y - 0.05),
                 (0.5),
                 Colors.black, 0.05,
