@@ -37,7 +37,7 @@ export class Cat extends EngineObject {
         this.friction = 0.2;
         this.speed = 0.14;
         this.jumpSpeed = 0.5;
-        this.gravityScale = 2.8;
+        this.gravityScale = 3;
 
         this.canDoubleJump = false
         this.jumpCount = 0;
@@ -76,11 +76,14 @@ export class Cat extends EngineObject {
             this.velocity = vec2(moveInput.x * this.speed, this.velocity.y);
         }
 
-        const jumpButtonPressed = gamepadWasPressed(0) || gamepadWasPressed(1) || gamepadWasPressed(2) || gamepadWasPressed(3) || keyWasPressed('ArrowUp') || keyWasPressed('w')
-        const jumpReleased = gamepadWasReleased(0) || gamepadWasReleased(1) || gamepadWasReleased(2) || gamepadWasReleased(3) || keyWasReleased('ArrowUp') || keyWasReleased('w');
+        let jumpButtonPressed = gamepadWasPressed(0) || gamepadWasPressed(1) || gamepadWasPressed(2) || gamepadWasPressed(3) || keyWasPressed('ArrowUp') || keyWasPressed('w')
+        let jumpReleased = gamepadWasReleased(0) || gamepadWasReleased(1) || gamepadWasReleased(2) || gamepadWasReleased(3) || keyWasReleased('ArrowUp') || keyWasReleased('w');
 
         if (this.groundObject) {
             this.jumpCount = 0
+        } else if (this.jumpCount === 0 && this.velocity.y < 0) {
+            jumpReleased = true
+            this.jumpCount = 1
         }
 
         if (this.canDoubleJump && jumpButtonPressed && this.jumpCount === 2) {

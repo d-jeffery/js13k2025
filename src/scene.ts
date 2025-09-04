@@ -4,8 +4,9 @@ import {
     tile,
     drawTile,
     vec2,
-    mouseIsDown, setCameraScale, Timer, setCameraPos, drawText, fontDefault, drawLine,
-    drawRect, mainContext, worldToScreen, engineObjects, RandomGenerator, mousePos, mouseWasPressed
+    setCameraScale, Timer, setCameraPos, drawText, fontDefault, drawLine,
+    drawRect, mainContext, worldToScreen, engineObjects, RandomGenerator, mousePos, mouseWasPressed, overlayContext,
+    mouseWasReleased
 } from "littlejsengine";
 import {drawGradientCircle} from "./draw.ts";
 import {Cat, Ground, PentHouse} from "./sprites.ts";
@@ -104,9 +105,9 @@ export class IntroScene extends Scene {
     public update(): void {
         this.offsetY = Math.sin(time)
 
-        if (this.playerIntroButton.isClicked(mousePos, mouseIsDown(0))) {
+        if (this.playerIntroButton.isClicked(mousePos, mouseWasPressed(0))) {
             this.finished = true;
-        } else if (this.playerEndlessButton.isClicked(mousePos, mouseIsDown(0))) {
+        } else if (this.playerEndlessButton.isClicked(mousePos, mouseWasPressed(0))) {
             this.finished = true;
         } else if (this.seedDownButton.isClicked(mousePos, mouseWasPressed(0))) {
             seed--;
@@ -227,23 +228,27 @@ export class GameScene extends Scene {
     }
 
     public drawOverlay(): void {
-        drawRect(vec2(0, -11 + this.cameraOffset), vec2(15, 3.5), new Color(1, 1, 1, 1), 0, false);
+        drawRect(vec2(0, -11 + this.cameraOffset), vec2(15, 3.5), Colors.white, 0, true);
 
-        drawRect(vec2(0, -11 + this.cameraOffset), vec2(13.5, 3), new Color(0, 0, 0, 1), 0, false);
+        drawRect(vec2(0, -11 + this.cameraOffset), vec2(13.5, 3), Colors.black, 0, true);
 
         drawText("Smashables: " + this.cat.getScore() + "/" + this.building.getPlantCount(),
             vec2(0, -10.5 + this.cameraOffset),
             0.8, Colors.yellow,
             0.2, new Color(0, 0, 0, 1),
             'center',
-            fontDefault);
+            fontDefault,
+            undefined,
+            overlayContext);
 
         drawText("Lives: " + this.cat.getLives(),
             vec2(0, -11.5 + this.cameraOffset),
             0.8, Colors.yellow,
             0.2, new Color(0, 0, 0, 1),
             'center',
-            fontDefault);
+            fontDefault,
+            undefined,
+            overlayContext);
     }
 
     public draw(): void {
@@ -346,10 +351,10 @@ export class EndScene extends Scene {
     }
 
     public update(): void {
-        if (this.restartButton.isClicked(mousePos, mouseIsDown(0))) {
+        if (this.restartButton.isClicked(mousePos, mouseWasReleased(0))) {
             this.nextScene = new GameScene()
             this.finished = true;
-        } else if (this.mainMenuButton.isClicked(mousePos, mouseIsDown(0))) {
+        } else if (this.mainMenuButton.isClicked(mousePos, mouseWasReleased(0))) {
             this.nextScene = new IntroScene()
             this.finished = true;
         }
