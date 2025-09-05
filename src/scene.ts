@@ -10,7 +10,7 @@ import {
 } from "littlejsengine";
 import {drawGradientCircle} from "./draw.ts";
 import {Cat, Ground, PentHouse} from "./sprites.ts";
-import {Building, EndlessBuilding, IntroBuilding} from "./buildings.ts";
+import {EndlessBuilding, IntroBuilding} from "./buildings.ts";
 import {Colors} from "./utils.ts";
 import {Button} from "./button.ts";
 

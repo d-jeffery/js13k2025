@@ -1,5 +1,5 @@
 import {
-    cameraPos,
+    cameraPos, type Color,
     drawCircle, drawEllipse, drawLine, drawPoly, drawRect, drawText,
     EngineObject, fontDefault, gamepadStick, gamepadWasPressed, gamepadWasReleased, isUsingGamepad, keyDirection,
     keyWasPressed, keyWasReleased, mainContext, ParticleEmitter, RandomGenerator,
@@ -137,17 +137,19 @@ export class Cat extends EngineObject {
 
 // Destructible objects that fall when hit by the cat
 class Destructible extends EngineObject {
-    constructor(pos: Vector2) {
+    constructor(pos: Vector2, tileIndex: number) {
         super(pos, vec2(1, 1));
         this.setCollision()
         this.mass = 0
         this.renderOrder = DESTRUCTIBLE_LAYER;
+        this.tileInfo = tile(tileIndex, 16)
     }
 
     public update() {
         super.update();
 
         if (this.pos.y < -10) {
+            // new Sound([,,333,.01,0,.9,4,1.9,,,,,,.5,,.6]).play()
             this.destroy()
         }
     }
@@ -167,7 +169,7 @@ class Destructible extends EngineObject {
         return false;
     }
 }
-
+/*
 class Plant extends Destructible {
     constructor(pos: Vector2) {
         super(pos);
@@ -187,7 +189,7 @@ class Flower extends Destructible {
         super(pos);
         this.tileInfo = tile(3, 16);
     }
-}
+}*/
 
 class Water extends EngineObject {
     constructor(pos: Vector2) {
@@ -252,6 +254,25 @@ export abstract class WindowSillBase extends EngineObject {
         this.color = Colors.clear
     }
 
+    protected abstract renderWindowContents(): void
+
+    protected renderWindowBase(color: Color, borderX: number, borderWidth: number = 0.1) {
+        drawRect(
+            vec2(this.pos.x, this.pos.y + 1.5),
+            vec2(this.size.x, this.size.y - 3),
+            color, 0, false
+        );
+
+        this.renderWindowContents()
+
+        drawRect(this.pos, this.size, Colors.white, 0, false);
+        drawLine(
+            vec2(this.pos.x - borderX, this.pos.y + 3),
+            vec2(this.pos.x + borderX, this.pos.y + 3),
+            borderWidth, Colors.white, false
+        );
+    }
+
     abstract doesHavePlant(): boolean;
 }
 
@@ -271,12 +292,7 @@ export class WindowSillEnemy extends WindowSillBase {
         this.color = Colors.clear
     }
 
-    public render() {
-        drawRect(
-            vec2(this.pos.x, this.pos.y + 1.5),
-            vec2(this.size.x, this.size.y - 3),
-            Colors.lightsOn, 0, false);
-
+    protected renderWindowContents() {
         drawEllipse(vec2(this.pos.x, this.pos.y + 1.25), 1, 1.25, 0,
             Colors.grey)
 
@@ -315,13 +331,10 @@ export class WindowSillEnemy extends WindowSillBase {
             Colors.skin)
         drawCircle(vec2(this.pos.x + 0.5, this.pos.y + 1), 0.25,
             Colors.skin)
+    }
 
-        drawRect(this.pos, this.size, Colors.white, 0, false)
-
-        drawLine(
-            vec2(this.pos.x - 1.5, this.pos.y + 3),
-            vec2(this.pos.x + 1.5, this.pos.y + 3),
-            0.1, Colors.white, false)
+    public render() {
+        this.renderWindowBase(Colors.lightsOn, 1.5, 0.1)
     }
 
     public update() {
@@ -374,28 +387,24 @@ export class ClosedWindowSill extends WindowSillBase {
         // Create a plant on the window sill at a random cadence
         switch (random.int(0, 4)) {
             case 0:
-                new Plant(vec2(pos.x, pos.y + 0.75))
+                new Destructible(vec2(pos.x, pos.y + 0.75), 1)
                 this.hasPlant = true
                 break;
             case 1:
-                new Pie(vec2(pos.x, pos.y + 0.75))
+                new Destructible(vec2(pos.x, pos.y + 0.75), 2)
                 this.hasPlant = true
                 break;
             case 2:
-                new Flower(vec2(pos.x, pos.y + 0.75))
+                new Destructible(vec2(pos.x, pos.y + 0.75), 3)
                 this.hasPlant = true
                 break;
             default:
         }
     }
 
-    public render() {
+    protected renderWindowContents() {
         switch (this.type) {
             case WINDOW_TYPE_CLOSE:
-                drawRect(
-                    vec2(this.pos.x, this.pos.y + 1.5),
-                    vec2(this.size.x, this.size.y - 3),
-                    this.lights ? Colors.lightsOn : Colors.dark_grey, 0, false);
                 drawLine(
                     vec2(this.pos.x - 1.25, this.pos.y + 1.5),
                     vec2(this.pos.x + 1.25, this.pos.y + 1.5),
@@ -406,11 +415,6 @@ export class ClosedWindowSill extends WindowSillBase {
                     0.1, Colors.white, false);
                 break;
             case WINDOW_WITH_DRAPES:
-                drawRect(
-                    vec2(this.pos.x, this.pos.y + 1.5),
-                    vec2(this.size.x, this.size.y - 3),
-                    this.lights ? Colors.lightsOn : Colors.dark_grey,
-                    0, false);
                 drawCircleSegment(
                     worldToScreen(vec2(this.pos.x - 1.25, this.pos.y + 2.75)),
                     45,
@@ -425,18 +429,11 @@ export class ClosedWindowSill extends WindowSillBase {
                     Colors.grey)
                 break;
             default:
-                drawRect(
-                    vec2(this.pos.x, this.pos.y + 1.5),
-                    vec2(this.size.x, this.size.y - 3),
-                    this.lights ? Colors.lightsOn : Colors.grey, 0, false);
         }
+    }
 
-        drawRect(this.pos, this.size, Colors.white, 0, false)
-
-        drawLine(
-            vec2(this.pos.x - 1.5, this.pos.y + 3),
-            vec2(this.pos.x + 1.5, this.pos.y + 3),
-            0.1, Colors.white, false)
+    public render() {
+        this.renderWindowBase(this.lights ? Colors.lightsOn : Colors.dark_grey, 1.5, 0.1)
     }
 
     public update() {
@@ -467,18 +464,11 @@ export class JumpScareEnemy extends ClosedWindowSill {
         super.update()
     }
 
+    protected renderWindowContents() {
+    }
+
     public render() {
-        drawRect(
-            vec2(this.pos.x, this.pos.y + 1.5),
-            vec2(this.size.x, this.size.y - 3),
-            this.lights ? Colors.lightsOn : Colors.grey, 0, false);
-
-        drawLine(
-            vec2(this.pos.x - 1.5, this.pos.y + 3),
-            vec2(this.pos.x + 1.5, this.pos.y + 3),
-            0.1, Colors.white, false)
-
-        drawRect(this.pos, this.size, Colors.white, 0, false)
+        this.renderWindowBase(this.lights ? Colors.lightsOn : Colors.grey, 1.5, 0.1)
     }
 
     public collideWithObject(object: EngineObject): boolean {
@@ -495,12 +485,7 @@ export class PentHouse extends WindowSillBase {
         super(pos, size);
     }
 
-    public render(): void {
-        drawRect(
-            vec2(this.pos.x, this.pos.y + 1.5),
-            vec2(this.size.x, this.size.y - 3),
-            Colors.lightsOn,
-            0, false);
+    protected renderWindowContents(): void {
         drawCircleSegment(
             worldToScreen(vec2(this.pos.x - 3.75, this.pos.y + 2.75)),
             45,
@@ -514,22 +499,20 @@ export class PentHouse extends WindowSillBase {
             Math.PI,
             Colors.grey)
 
-        drawRect(this.pos, this.size, Colors.white, 0, false)
-
         drawLine(
             vec2(this.pos.x - 3.75, this.pos.y + 1.5),
             vec2(this.pos.x + 3.75, this.pos.y + 1.5),
-            0.2, Colors.white, false)
+            0.1, Colors.white, false)
 
         drawLine(
             vec2(this.pos.x, this.pos.y + 2.75),
-            vec2(this.pos.x, this.pos.y + 1.375),
+            vec2(this.pos.x, this.pos.y + 1.5),
             0.1, Colors.white, false);
+    }
 
-        drawLine(
-            vec2(this.pos.x - 4.25, this.pos.y + 3),
-            vec2(this.pos.x + 4.25, this.pos.y + 3),
-            0.1, Colors.white, false)
+    public render(): void {
+
+        this.renderWindowBase(Colors.lightsOn, 4.25, 0.1)
 
         drawText("Home, Sweet Home!",
             vec2(this.pos.x, this.pos.y + 3.5), 0.8, Colors.yellow,
