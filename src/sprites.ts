@@ -384,21 +384,12 @@ export class ClosedWindowSill extends WindowSillBase {
         this.reactTime = random.int(500, 1000)
         this.someoneHome = random.int(0, 2) === 0
 
-        // Create a plant on the window sill at a random cadence
-        switch (random.int(0, 4)) {
-            case 0:
-                new Destructible(vec2(pos.x, pos.y + 0.75), 1)
-                this.hasPlant = true
-                break;
-            case 1:
-                new Destructible(vec2(pos.x, pos.y + 0.75), 2)
-                this.hasPlant = true
-                break;
-            case 2:
-                new Destructible(vec2(pos.x, pos.y + 0.75), 3)
-                this.hasPlant = true
-                break;
-            default:
+
+        if (random.int(0, 5) < 4) {
+            const destructibleTiles = [1, 2, 3];
+            const tileIndex = destructibleTiles[random.int(0, destructibleTiles.length)];
+            new Destructible(vec2(pos.x, pos.y + 0.75), tileIndex);
+            this.hasPlant = true
         }
     }
 
