@@ -3,24 +3,40 @@ import {ClosedWindowSill, JumpScareEnemy, PentHouse, WindowSillBase, WindowSillE
 
 export class Building {
 
-    private windows: WindowSillBase[];
-    private plantCount: number
+    protected windows: WindowSillBase[];
+    protected posx: number
+    protected posy: number
+    protected width: number
+    protected height: number
+    protected randomGenerator: RandomGenerator
 
     constructor(randomGenerator: RandomGenerator) {
-        this.plantCount = 0;
         this.windows = [];
 
-        const posx = 5
-        const posy = 6;
-        const width = 2.5
-        const height = 0.5
+        this.posx = 5
+        this.posy = 6;
+        this.width = 2.5
+        this.height = 0.5
+        this.randomGenerator = randomGenerator
 
-        this.windows.push(new ClosedWindowSill(vec2(-posx, -posy), vec2(width, height), randomGenerator));
-        this.windows.push(new ClosedWindowSill(vec2(posx, -posy), vec2(width, height), randomGenerator));
+        this.windows.push(new ClosedWindowSill(vec2(-this.posx, -this.posy), vec2(this.width, this.height), this.randomGenerator));
+        this.windows.push(new ClosedWindowSill(vec2(this.posx, -this.posy), vec2(this.width, this.height), this.randomGenerator));
+    }
+
+}
+
+export class IntroBuilding extends Building {
+
+    private readonly plantCount: number
+
+    constructor(randomGenerator: RandomGenerator) {
+        super(randomGenerator)
+
+        this.plantCount = 0;
 
         const levels = [0, 1, 0, 1, 1, 1, 0, 2, 0, 3, 1, 4, 1, 6];
         for (const [index, level] of levels.entries()) {
-            this.windows.push(...WindowConfigs[level](posx, posy * index, width, height, randomGenerator));
+            this.windows.push(...WindowConfigs[level](this.posx, this.posy * index, this.width, this.height, randomGenerator));
         }
 
        this.plantCount = this.windows.filter(w => w.doesHavePlant()).length
@@ -28,6 +44,20 @@ export class Building {
 
     public getPlantCount(): number {
         return this.plantCount;
+    }
+}
+
+export class EndlessBuilding extends Building {
+
+    constructor(randomGenerator: RandomGenerator) {
+        super(randomGenerator)
+
+        this.posy = 0;
+    }
+
+    public addLevel() {
+        this.windows.push(...WindowConfigs[this.randomGenerator.int(0, 5)](this.posx, this.posy, this.width, this.height, this.randomGenerator));
+        this.posy += 6
     }
 }
 

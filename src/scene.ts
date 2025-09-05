@@ -10,10 +10,9 @@ import {
 } from "littlejsengine";
 import {drawGradientCircle} from "./draw.ts";
 import {Cat, Ground, PentHouse} from "./sprites.ts";
-import {Building} from "./building.ts";
+import {Building, EndlessBuilding, IntroBuilding} from "./buildings.ts";
 import {Colors} from "./utils.ts";
 import {Button} from "./button.ts";
-
 
 // Base class for all scenes
 export abstract class Scene {
@@ -107,8 +106,10 @@ export class IntroScene extends Scene {
 
         if (this.playerIntroButton.isClicked(mousePos, mouseWasPressed(0))) {
             this.finished = true;
+            this.nextScene = new TutorialGameScene()
         } else if (this.playerEndlessButton.isClicked(mousePos, mouseWasPressed(0))) {
             this.finished = true;
+            this.nextScene = new EndlessGameScene()
         } else if (this.seedDownButton.isClicked(mousePos, mouseWasPressed(0))) {
             seed--;
             if (seed < 0) {
@@ -139,7 +140,7 @@ export class IntroScene extends Scene {
     }
 
     public getNextScene(): Scene {
-        return this.nextScene || new GameScene();
+        return this.nextScene || new TutorialGameScene();
     }
 
     public isFinished(): boolean {
@@ -150,12 +151,12 @@ export class IntroScene extends Scene {
     }
 }
 
-export class GameScene extends Scene {
+export class TutorialGameScene extends Scene {
     private cat: Cat
     private countDown: Timer;
     private cameraOffset: number;
     private catReached: boolean;
-    private building: Building;
+    private building: IntroBuilding
     // private lerpY: number;
     // private rain: ParticleEmitter;
     // private lerpFactor: number = 0
@@ -169,7 +170,7 @@ export class GameScene extends Scene {
 
         this.cat = new Cat(vec2(0, -7.5));
 
-        this.building = new Building(new RandomGenerator(seed))
+        this.building = new IntroBuilding(new RandomGenerator(seed));
 
         this.countDown = new Timer(5);
         this.finished = false;
@@ -298,7 +299,7 @@ export class GameScene extends Scene {
     }
 
     public getNextScene(): Scene {
-        return new EndScene()
+        return new EndScene(false)
     }
 
     public isFinished(): boolean {
@@ -312,16 +313,173 @@ export class GameScene extends Scene {
 
 }
 
+export class EndlessGameScene extends Scene {
+
+    protected finished: boolean;
+    private cat: Cat
+    private cameraOffset: number;
+    private catReached: boolean;
+    private countDown: Timer;
+    private building: EndlessBuilding;
+    private randomeGenerator: RandomGenerator;
+
+    constructor() {
+        super();
+
+        this.cameraOffset = 0
+        this.catReached = false;
+        this.nextScene = undefined;
+        this.finished = false;
+        this.countDown = new Timer(5);
+        this.randomeGenerator = new RandomGenerator(seed);
+
+        new Ground(vec2(0, -8.5), vec2(16, 0.5));
+
+        this.cat = new Cat(vec2(0, -7.5));
+
+        this.building = new EndlessBuilding(this.randomeGenerator);
+
+        for (let i = 0; i < 20; i++) {
+            this.building.addLevel();
+        }
+
+        setCameraScale(50)
+    }
+
+    public update(): void {
+
+        const catPos = worldToScreen(this.cat.pos)
+
+        // End the scene if the cat goes off the bottom of the screen
+        if (catPos.y > 1180) {
+            this.finished = true;
+        }
+
+        const catPosY = this.cat.pos.y
+        if (catPosY > 7 && !this.catReached) {
+            this.catReached = true
+        }
+
+        if (this.countDown.elapsed() && this.catReached) {
+            if (this.cameraOffset >= 70) {
+                // Dont progresses camera if at "top"
+            } else if (catPosY - this.cameraOffset >= 10) {
+                // this.cameraOffset = lerp(this.lerpY, catPosY - 10, catPosY)
+                this.cameraOffset = catPosY - 10
+            } else {
+                this.cameraOffset += 0.01
+            }
+            setCameraPos(vec2(0, this.cameraOffset))
+        } else if (this.catReached) {
+            this.countDown.set(0)
+        }
+
+        if (this.cat.getLives() <= 0) {
+            this.finished = true;
+        }
+
+        if (this.cat.groundObject instanceof PentHouse) {
+            setTimeout(() => this.finished = true, 1000)
+        }
+    }
+
+
+    public draw(): void {
+        drawRect(vec2(0, 2 + this.cameraOffset), vec2(14, 23), Colors.darker_grey, 0, false);
+
+        // Draw building outline
+        drawLine(vec2(-7, -8.5), vec2(-7, 13 + this.cameraOffset), 0.1, Colors.white, false)
+        drawLine(vec2(7, -8.5), vec2(7, 13 + this.cameraOffset), 0.1, Colors.white, false)
+
+        // Draw door
+        // drawCircle(vec2(0,-5.5), 2, new Color(0.4,0.22,0.19,1))
+        //drawRect(vec2(0,-7), vec2(4,3), Colors.brown, 0, false)
+
+        drawRect(vec2(0, -5.75), vec2(4, -5.5), Colors.brown, 0, false)
+        drawLine(vec2(-2, -3), vec2(2, -3), 0.1, Colors.white, false)
+        drawLine(vec2(0, -8.5), vec2(0, -3), 0.1, Colors.white, false)
+        drawLine(vec2(2, -8.5), vec2(2, -3), 0.1, Colors.white, false)
+        drawLine(vec2(-2, -8.5), vec2(-2, -3), 0.1, Colors.white, false)
+
+        drawLine(vec2(0.5, -5), vec2(0.5, -6), 0.1, Colors.yellow, false)
+        drawLine(vec2(-0.5, -5), vec2(-0.5, -6), 0.1, Colors.yellow, false)
+
+        // const font = new FontImage(this.fontImg, vec2(16, 16), vec2(0, 0));
+        drawText("Locked out again!",
+            vec2(0, -1.5), 0.8, Colors.yellow,
+            0.1, new Color(0, 0, 0, 1),
+            'center',
+            fontDefault,
+            undefined,
+            mainContext);
+
+        drawText("I'll need to double jump\njust to reach these windows...",
+            vec2(0, 4.5), 0.8, Colors.yellow,
+            0.1, new Color(0, 0, 0, 1),
+            'center',
+            fontDefault,
+            undefined,
+            mainContext);
+
+        drawText("This building is huge!\nHow far can I go?",
+            vec2(0, 10.5), 0.8, Colors.yellow,
+            0.1, new Color(0, 0, 0, 1),
+            'center',
+            fontDefault,
+            undefined,
+            mainContext);
+    }
+
+    public drawOverlay(): void {
+        drawRect(vec2(0, -11 + this.cameraOffset), vec2(15, 3.5), Colors.white, 0, true);
+
+        drawRect(vec2(0, -11 + this.cameraOffset), vec2(13.5, 3), Colors.black, 0, true);
+
+        drawText("Smashables: " + this.cat.getScore(),
+            vec2(0, -10.5 + this.cameraOffset),
+            0.8, Colors.yellow,
+            0.2, new Color(0, 0, 0, 1),
+            'center',
+            fontDefault,
+            undefined,
+            overlayContext);
+
+        drawText("Lives: " + this.cat.getLives(),
+            vec2(0, -11.5 + this.cameraOffset),
+            0.8, Colors.yellow,
+            0.2, new Color(0, 0, 0, 1),
+            'center',
+            fontDefault,
+            undefined,
+            overlayContext);
+    }
+
+    public getNextScene(): Scene {
+        return new EndScene(true)
+    }
+
+    public isFinished(): boolean {
+        return this.finished
+    }
+
+    public clean(): void {
+        engineObjects.forEach(e => e.destroy())
+        setCameraScale(35)
+    }
+}
+
 export class EndScene extends Scene {
 
     protected finished: boolean;
     private restartButton: Button;
     private mainMenuButton: Button;
+    private endless: boolean;
 
-    constructor() {
+    constructor(endless: boolean = false) {
         super();
 
         this.finished = false
+        this.endless = endless;
 
         this.restartButton = new Button("Restart", vec2(0, 0), vec2(14, 2));
         this.mainMenuButton = new Button("Main Menu", vec2(0, -3), vec2(14, 2));
@@ -352,7 +510,7 @@ export class EndScene extends Scene {
 
     public update(): void {
         if (this.restartButton.isClicked(mousePos, mouseWasReleased(0))) {
-            this.nextScene = new GameScene()
+            this.nextScene = this.endless ? new EndlessGameScene() : new TutorialGameScene()
             this.finished = true;
         } else if (this.mainMenuButton.isClicked(mousePos, mouseWasReleased(0))) {
             this.nextScene = new IntroScene()

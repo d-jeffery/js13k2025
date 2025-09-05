@@ -79,13 +79,17 @@ export class Cat extends EngineObject {
         let jumpButtonPressed = gamepadWasPressed(0) || gamepadWasPressed(1) || gamepadWasPressed(2) || gamepadWasPressed(3) || keyWasPressed('ArrowUp') || keyWasPressed('w')
         let jumpReleased = gamepadWasReleased(0) || gamepadWasReleased(1) || gamepadWasReleased(2) || gamepadWasReleased(3) || keyWasReleased('ArrowUp') || keyWasReleased('w');
 
+        // Reset jump count when touching the ground
         if (this.groundObject) {
             this.jumpCount = 0
         } else if (this.jumpCount === 0 && this.velocity.y < 0) {
+            // If the cat is falling and hasn't jumped yet, it means it has just left the ground,
+            // so we set the jump count to 1 to allow for a double jump.
             jumpReleased = true
             this.jumpCount = 1
         }
 
+        // Handle jumping and double jumping
         if (this.canDoubleJump && jumpButtonPressed && this.jumpCount === 2) {
             this.velocity = vec2(this.velocity.x, this.jumpSpeed);
             this.canDoubleJump = false;
