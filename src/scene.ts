@@ -51,7 +51,7 @@ fontImage.onload = () => {
 };
 */
 
-let seed = 2;
+let seed = 1;
 
 export class IntroScene extends Scene {
 
@@ -89,14 +89,14 @@ export class IntroScene extends Scene {
 
         // this.font = new FontImage(this.fontImg, vec2(16, 16), vec2(0, 0));
 
-        // this.rain = new ParticleEmitter(vec2(6, 14), (5/4) * Math.PI, vec2(24,1), 0, 150, 0, tile(3, 16),
-        //     new Color(0.57, 0.72, 0.82, 0.75),
-        //     new Color(0.57, 0.72, 0.82, 0.75),
-        //     new Color(0.77, 0.88, 0.96, 0.5),
-        //     new Color(0.77, 0.88, 0.96, 0.5),
-        //     2, 0.15, 0.1, 0.25, 0.05, 1, 1, 1, 3.14, 0.1, 0.25, false, false);
+/*        this.rain = new ParticleEmitter(vec2(6, 14), (5/4) * Math.PI, vec2(24,1), 0, 150, 0, tile(3, 16),
+            new Color(0.57, 0.72, 0.82, 0.75),
+            new Color(0.57, 0.72, 0.82, 0.75),
+            new Color(0.77, 0.88, 0.96, 0.5),
+            new Color(0.77, 0.88, 0.96, 0.5),
+            2, 0.15, 0.1, 0.25, 0.05, 1, 1, 1, 3.14, 0.1, 0.25, false, false);
 
-        // this.rain.renderOrder = 3
+        this.rain.renderOrder = 3*/
 
         // setCameraScale(50)
     }
@@ -112,8 +112,8 @@ export class IntroScene extends Scene {
             this.nextScene = new EndlessGameScene()
         } else if (this.seedDownButton.isClicked(mousePos, mouseWasPressed(0))) {
             seed--;
-            if (seed < 0) {
-                seed = 0;
+            if (seed < 1) {
+                seed = 1;
             }
         } else if (this.seedUpButton.isClicked(mousePos, mouseWasPressed(0))) {
             seed++
@@ -149,6 +149,17 @@ export class IntroScene extends Scene {
 
     public clean(): void {
     }
+}
+
+function drawDoor(): void {
+    drawRect(vec2(0, -5.75), vec2(4, -5.5), Colors.brown, 0, false)
+    drawLine(vec2(-2, -3), vec2(2, -3), 0.1, Colors.white, false)
+    drawLine(vec2(0, -8.5), vec2(0, -3), 0.1, Colors.white, false)
+    drawLine(vec2(2, -8.5), vec2(2, -3), 0.1, Colors.white, false)
+    drawLine(vec2(-2, -8.5), vec2(-2, -3), 0.1, Colors.white, false)
+
+    drawLine(vec2(0.5, -5), vec2(0.5, -6), 0.1, Colors.yellow, false)
+    drawLine(vec2(-0.5, -5), vec2(-0.5, -6), 0.1, Colors.yellow, false)
 }
 
 export class TutorialGameScene extends Scene {
@@ -259,18 +270,7 @@ export class TutorialGameScene extends Scene {
         drawLine(vec2(-7, -8.5), vec2(-7, 13 + this.cameraOffset), 0.1, Colors.white, false)
         drawLine(vec2(7, -8.5), vec2(7, 13 + this.cameraOffset), 0.1, Colors.white, false)
 
-        // Draw door
-        // drawCircle(vec2(0,-5.5), 2, new Color(0.4,0.22,0.19,1))
-        //drawRect(vec2(0,-7), vec2(4,3), Colors.brown, 0, false)
-
-        drawRect(vec2(0, -5.75), vec2(4, -5.5), Colors.brown, 0, false)
-        drawLine(vec2(-2, -3), vec2(2, -3), 0.1, Colors.white, false)
-        drawLine(vec2(0, -8.5), vec2(0, -3), 0.1, Colors.white, false)
-        drawLine(vec2(2, -8.5), vec2(2, -3), 0.1, Colors.white, false)
-        drawLine(vec2(-2, -8.5), vec2(-2, -3), 0.1, Colors.white, false)
-
-        drawLine(vec2(0.5, -5), vec2(0.5, -6), 0.1, Colors.yellow, false)
-        drawLine(vec2(-0.5, -5), vec2(-0.5, -6), 0.1, Colors.yellow, false)
+        drawDoor()
 
         // const font = new FontImage(this.fontImg, vec2(16, 16), vec2(0, 0));
         drawText("Locked out again!",
@@ -391,18 +391,7 @@ export class EndlessGameScene extends Scene {
         drawLine(vec2(-7, -8.5), vec2(-7, 13 + this.cameraOffset), 0.1, Colors.white, false)
         drawLine(vec2(7, -8.5), vec2(7, 13 + this.cameraOffset), 0.1, Colors.white, false)
 
-        // Draw door
-        // drawCircle(vec2(0,-5.5), 2, new Color(0.4,0.22,0.19,1))
-        //drawRect(vec2(0,-7), vec2(4,3), Colors.brown, 0, false)
-
-        drawRect(vec2(0, -5.75), vec2(4, -5.5), Colors.brown, 0, false)
-        drawLine(vec2(-2, -3), vec2(2, -3), 0.1, Colors.white, false)
-        drawLine(vec2(0, -8.5), vec2(0, -3), 0.1, Colors.white, false)
-        drawLine(vec2(2, -8.5), vec2(2, -3), 0.1, Colors.white, false)
-        drawLine(vec2(-2, -8.5), vec2(-2, -3), 0.1, Colors.white, false)
-
-        drawLine(vec2(0.5, -5), vec2(0.5, -6), 0.1, Colors.yellow, false)
-        drawLine(vec2(-0.5, -5), vec2(-0.5, -6), 0.1, Colors.yellow, false)
+        drawDoor()
 
         // const font = new FontImage(this.fontImg, vec2(16, 16), vec2(0, 0));
         drawText("Locked out again!",
