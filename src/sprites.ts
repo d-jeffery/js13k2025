@@ -3,7 +3,7 @@ import {
     drawCircle, drawEllipse, drawLine, drawPoly, drawRect, drawText,
     EngineObject, fontDefault, gamepadStick, gamepadWasPressed, gamepadWasReleased, isUsingGamepad, keyDirection,
     keyWasPressed, keyWasReleased, mainContext, ParticleEmitter, RandomGenerator,
-    tile, time, Timer, vec2, type Vector2, worldToScreen, Sound
+    tile, time, Timer, vec2, type Vector2, worldToScreen
 } from "littlejsengine";
 import {drawCircleSegment} from "./draw.ts";
 import {Colors} from "./utils.ts";
@@ -149,7 +149,7 @@ class Destructible extends EngineObject {
         super.update();
 
         if (this.pos.y < -10) {
-            new Sound([,,333,.01,0,.9,4,1.9,,,,,,.5,,.6]).play()
+            // new Sound([,,333,.01,0,.9,4,1.9,,,,,,.5,,.6]).play()
             this.destroy()
         }
     }
@@ -169,27 +169,6 @@ class Destructible extends EngineObject {
         return false;
     }
 }
-/*
-class Plant extends Destructible {
-    constructor(pos: Vector2) {
-        super(pos);
-        this.tileInfo = tile(1, 16);
-    }
-}
-
-class Pie extends Destructible {
-    constructor(pos: Vector2) {
-        super(pos);
-        this.tileInfo = tile(2, 16)
-    }
-}
-
-class Flower extends Destructible {
-    constructor(pos: Vector2) {
-        super(pos);
-        this.tileInfo = tile(3, 16);
-    }
-}*/
 
 class Water extends EngineObject {
     constructor(pos: Vector2) {

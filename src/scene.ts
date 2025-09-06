@@ -339,7 +339,7 @@ export class EndlessGameScene extends Scene {
 
         this.building = new EndlessBuilding(this.randomeGenerator);
 
-        for (let i = 0; i < 20; i++) {
+        for (let i = 0; i < 5; i++) {
             this.building.addLevel();
         }
 
@@ -347,6 +347,11 @@ export class EndlessGameScene extends Scene {
     }
 
     public update(): void {
+
+        if (this.cat.pos.y  + 5 > this.building.currentHeight()) {
+            this.building.addLevel();
+            console.log(this.cat.pos.y, this.building.currentHeight());
+        }
 
         const catPos = worldToScreen(this.cat.pos)
 
@@ -361,9 +366,7 @@ export class EndlessGameScene extends Scene {
         }
 
         if (this.countDown.elapsed() && this.catReached) {
-            if (this.cameraOffset >= 70) {
-                // Dont progresses camera if at "top"
-            } else if (catPosY - this.cameraOffset >= 10) {
+            if (catPosY - this.cameraOffset >= 10) {
                 // this.cameraOffset = lerp(this.lerpY, catPosY - 10, catPosY)
                 this.cameraOffset = catPosY - 10
             } else {

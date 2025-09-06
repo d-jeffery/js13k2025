@@ -34,7 +34,7 @@ export class IntroBuilding extends Building {
 
         this.plantCount = 0;
 
-        const levels = [0, 1, 0, 1, 1, 1, 0, 2, 0, 3, 1, 4, 1, 6];
+        const levels = [0, 1, 0, 1, 0, 1, 0, 2, 0, 3, 1, 4, 1, 6];
         for (const [index, level] of levels.entries()) {
             this.windows.push(...WindowConfigs[level](this.posx, this.posy * index, this.width, this.height, randomGenerator));
         }
@@ -58,6 +58,10 @@ export class EndlessBuilding extends Building {
     public addLevel() {
         this.windows.push(...WindowConfigs[this.randomGenerator.int(0, 5)](this.posx, this.posy, this.width, this.height, this.randomGenerator));
         this.posy += 6
+    }
+
+    public currentHeight(): number {
+        return this.posy
     }
 }
 
