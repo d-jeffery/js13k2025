@@ -137,6 +137,8 @@ export class IntroScene extends Scene {
 
         this.seedUpButton.draw()
         this.seedDownButton.draw()
+
+        drawText(`Change "seed" or randomize game`, vec2(0, -9), 1.2, Colors.white)
     }
 
     public getNextScene(): Scene {

@@ -72,7 +72,7 @@ interface windowConfigOptions {
 const WindowConfigs: windowConfigOptions = {
     0: (posx: number, posy: number, width: number, height: number, random: RandomGenerator): WindowSillBase[] => {
         return [
-            createSill(JumpScareEnemy, -posx + width, posy, width, height, random),
+            createSill(ClosedWindowSill, -posx + width, posy, width, height, random),
             createSill(ClosedWindowSill, posx - width, posy, width, height, random),
         ]
     },

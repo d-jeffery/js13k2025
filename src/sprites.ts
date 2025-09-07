@@ -52,9 +52,7 @@ export class Cat extends EngineObject {
         this.flashInterval = undefined
     }
 
-    public respawn(): void {
-        this.pos = vec2(this.lastGround!.pos.x, this.lastGround!.pos.y + 1);
-        // Set flashing
+    public setFlashing(): void {
         this.flashInterval = setInterval(() => {
             if (this.color.a < 1) {
                 this.color.set(this.color.r, this.color.g, this.color.b, 1);
@@ -71,12 +69,17 @@ export class Cat extends EngineObject {
         }, 1000)
     }
 
+    public respawn(): void {
+        this.pos = vec2(this.lastGround!.pos.x, this.lastGround!.pos.y + 1);
+    }
+
     public getLives(): number {
         return this.lives;
     }
 
     public damage(): void {
         this.lives -= 1
+        this.setFlashing()
     }
 
     public addToScore(points: number): void {
