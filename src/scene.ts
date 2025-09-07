@@ -31,32 +31,11 @@ export abstract class Scene {
     public abstract clean(): void;
 }
 
-
-/*
-const fontImage = new Image();
-fontImage.src = 'assets/awesome_9.png'; // Path to your PNG font
-let awesomeFont = undefined;
-
-fontImage.onload = () => {
-    // 2. Create the FontImage instance
-    // Adjust tileSize and paddingSize as needed for your font
-    const awesomeFont = new FontImage(fontImage, vec2(8, 8), vec2(0, 1));
-
-    // 3. Draw text using your font
-    // World space:
-    awesomeFont.drawText('Hello World!', vec2(5, 5), 0.5, true);
-
-    // Screen space:
-    awesomeFont.drawTextScreen('Hello World!', vec2(100, 50), 1, true);
-};
-*/
-
 let seed = 1;
 
 export class IntroScene extends Scene {
 
     private catImg: HTMLImageElement = new Image(8, 8);
-    //private fontImg: HTMLImageElement = new Image();
     private offsetY: number;
     protected finished: boolean;
     protected nextScene: Scene | undefined;
@@ -65,13 +44,6 @@ export class IntroScene extends Scene {
     private playerEndlessButton: Button
     private seedUpButton: Button
     private seedDownButton: Button
-
-    // private font: FontImage;
-
-    // private lerpY: number;
-
-    // private rain: ParticleEmitter;
-    // private lerpFactor: number = 0
 
     public constructor() {
         super();
@@ -153,58 +125,31 @@ export class IntroScene extends Scene {
     }
 }
 
-function drawDoor(): void {
-    drawRect(vec2(0, -5.75), vec2(4, -5.5), Colors.brown, 0, false)
-    drawLine(vec2(-2, -3), vec2(2, -3), 0.1, Colors.white, false)
-    drawLine(vec2(0, -8.5), vec2(0, -3), 0.1, Colors.white, false)
-    drawLine(vec2(2, -8.5), vec2(2, -3), 0.1, Colors.white, false)
-    drawLine(vec2(-2, -8.5), vec2(-2, -3), 0.1, Colors.white, false)
 
-    drawLine(vec2(0.5, -5), vec2(0.5, -6), 0.1, Colors.yellow, false)
-    drawLine(vec2(-0.5, -5), vec2(-0.5, -6), 0.1, Colors.yellow, false)
-}
+export abstract class GameScene extends Scene {
 
-export class TutorialGameScene extends Scene {
-    private cat: Cat
-    private countDown: Timer;
-    private cameraOffset: number;
-    private catReached: boolean;
-    private building: IntroBuilding
-    // private lerpY: number;
-    // private rain: ParticleEmitter;
-    // private lerpFactor: number = 0
-
+    protected cat: Cat;
+    protected countDown: Timer;
+    protected cameraOffset: number;
+    protected catReached: boolean;
     protected finished: boolean;
 
-    public constructor() {
-        super();
-
-        new Ground(vec2(0, -8.5), vec2(16, 0.5));
+    protected constructor() {
+        super()
 
         this.cat = new Cat(vec2(0, -7.5));
-
-        this.building = new IntroBuilding(new RandomGenerator(seed));
-
         this.countDown = new Timer(5);
-        this.finished = false;
         this.cameraOffset = 0
         this.catReached = false;
         this.nextScene = undefined;
-        /*
-                this.rain = new ParticleEmitter(vec2(6, 14), (5/4) * Math.PI, vec2(24,1), 0, 150, 0, tile(3, 16),
-                    new Color(0.57, 0.72, 0.82, 0.75),
-                    new Color(0.57, 0.72, 0.82, 0.75),
-                    new Color(0.77, 0.88, 0.96, 0.5),
-                    new Color(0.77, 0.88, 0.96, 0.5),
-                    2, 0.15, 0.1, 0.25, 0.05, 1, 1, 1, 3.14, 0.1, 0.25, false, false, true);
+        this.finished = false;
 
-                this.rain.renderOrder = 3*/
+        new Ground(vec2(0, -8.5), vec2(16, 0.5));
 
         setCameraScale(50)
     }
 
-    public update(): void {
-        // this.cat.update()
+    public update() {
 
         const catPos = worldToScreen(this.cat.pos)
 
@@ -238,6 +183,78 @@ export class TutorialGameScene extends Scene {
         if (this.cat.getLives() <= 0) {
             this.finished = true;
         }
+    }
+
+    public draw() {
+        drawRect(vec2(0, 2 + this.cameraOffset), vec2(14, 23), Colors.darker_grey, 0, false);
+
+        // Draw building outline
+        drawLine(vec2(-7, -8.5), vec2(-7, 13 + this.cameraOffset), 0.1, Colors.white, false)
+        drawLine(vec2(7, -8.5), vec2(7, 13 + this.cameraOffset), 0.1, Colors.white, false)
+
+        this.drawDoor()
+
+        // const font = new FontImage(this.fontImg, vec2(16, 16), vec2(0, 0));
+        drawText("Locked out again!",
+            vec2(0, -1.5), 0.8, Colors.yellow,
+            0.1, new Color(0, 0, 0, 1),
+            'center',
+            fontDefault,
+            undefined,
+            mainContext);
+
+        drawText("I'll need to double jump\njust to reach these windows...",
+            vec2(0, 4.5), 0.8, Colors.yellow,
+            0.1, new Color(0, 0, 0, 1),
+            'center',
+            fontDefault,
+            undefined,
+            mainContext);
+    }
+
+    protected drawDoor(): void {
+        drawRect(vec2(0, -5.75), vec2(4, -5.5), Colors.brown, 0, false)
+        drawLine(vec2(-2, -3), vec2(2, -3), 0.1, Colors.white, false)
+        drawLine(vec2(0, -8.5), vec2(0, -3), 0.1, Colors.white, false)
+        drawLine(vec2(2, -8.5), vec2(2, -3), 0.1, Colors.white, false)
+        drawLine(vec2(-2, -8.5), vec2(-2, -3), 0.1, Colors.white, false)
+
+        drawLine(vec2(0.5, -5), vec2(0.5, -6), 0.1, Colors.yellow, false)
+        drawLine(vec2(-0.5, -5), vec2(-0.5, -6), 0.1, Colors.yellow, false)
+    }
+
+    public isFinished(): boolean {
+        return this.finished
+    }
+
+    public clean(): void {
+        engineObjects.forEach(e => e.destroy())
+        setCameraScale(35)
+    }
+}
+
+export class TutorialGameScene extends GameScene {
+
+    private building: IntroBuilding
+
+    public constructor() {
+        super();
+
+        this.building = new IntroBuilding(new RandomGenerator(seed));
+
+        /*
+                this.rain = new ParticleEmitter(vec2(6, 14), (5/4) * Math.PI, vec2(24,1), 0, 150, 0, tile(3, 16),
+                    new Color(0.57, 0.72, 0.82, 0.75),
+                    new Color(0.57, 0.72, 0.82, 0.75),
+                    new Color(0.77, 0.88, 0.96, 0.5),
+                    new Color(0.77, 0.88, 0.96, 0.5),
+                    2, 0.15, 0.1, 0.25, 0.05, 1, 1, 1, 3.14, 0.1, 0.25, false, false, true);
+
+                this.rain.renderOrder = 3*/
+    }
+
+    public update(): void {
+        super.update();
 
         if (this.cat.groundObject instanceof PentHouse) {
             setTimeout(() => this.finished = true, 1000)
@@ -269,30 +286,7 @@ export class TutorialGameScene extends Scene {
     }
 
     public draw(): void {
-        drawRect(vec2(0, 2 + this.cameraOffset), vec2(14, 23), Colors.darker_grey, 0, false);
-
-        // Draw building outline
-        drawLine(vec2(-7, -8.5), vec2(-7, 13 + this.cameraOffset), 0.1, Colors.white, false)
-        drawLine(vec2(7, -8.5), vec2(7, 13 + this.cameraOffset), 0.1, Colors.white, false)
-
-        drawDoor()
-
-        // const font = new FontImage(this.fontImg, vec2(16, 16), vec2(0, 0));
-        drawText("Locked out again!",
-            vec2(0, -1.5), 0.8, Colors.yellow,
-            0.1, new Color(0, 0, 0, 1),
-            'center',
-            fontDefault,
-            undefined,
-            mainContext);
-
-        drawText("I'll need to double jump\njust to reach these windows...",
-            vec2(0, 4.5), 0.8, Colors.yellow,
-            0.1, new Color(0, 0, 0, 1),
-            'center',
-            fontDefault,
-            undefined,
-            mainContext);
+        super.draw()
 
         drawText("And if I time it right,\nI can reach the penthouse!",
             vec2(0, 10.5), 0.8, Colors.yellow,
@@ -307,40 +301,17 @@ export class TutorialGameScene extends Scene {
         return new EndScene(false)
     }
 
-    public isFinished(): boolean {
-        return this.finished
-    }
-
-    public clean(): void {
-        engineObjects.forEach(e => e.destroy())
-        setCameraScale(35)
-    }
-
 }
 
-export class EndlessGameScene extends Scene {
+export class EndlessGameScene extends GameScene {
 
-    protected finished: boolean;
-    private cat: Cat
-    private cameraOffset: number;
-    private catReached: boolean;
-    private countDown: Timer;
     private building: EndlessBuilding;
     private randomeGenerator: RandomGenerator;
 
     constructor() {
         super();
 
-        this.cameraOffset = 0
-        this.catReached = false;
-        this.nextScene = undefined;
-        this.finished = false;
-        this.countDown = new Timer(5);
         this.randomeGenerator = new RandomGenerator(seed);
-
-        new Ground(vec2(0, -8.5), vec2(16, 0.5));
-
-        this.cat = new Cat(vec2(0, -7.5));
 
         this.building = new EndlessBuilding(this.randomeGenerator);
 
@@ -358,68 +329,11 @@ export class EndlessGameScene extends Scene {
             console.log(this.cat.pos.y, this.building.currentHeight());
         }
 
-        const catPos = worldToScreen(this.cat.pos)
-
-        // End the scene if the cat goes off the bottom of the screen
-        if (catPos.y > 1180 && this.cat.getLives() > 0) {
-            this.cat.damage()
-            this.cat.respawn()
-        } else if (catPos.y > 1180) {
-            this.finished = true;
-        }
-
-        const catPosY = this.cat.pos.y
-        if (catPosY > 7 && !this.catReached) {
-            this.catReached = true
-        }
-
-        if (this.countDown.elapsed() && this.catReached) {
-            if (catPosY - this.cameraOffset >= 10) {
-                // this.cameraOffset = lerp(this.lerpY, catPosY - 10, catPosY)
-                this.cameraOffset = catPosY - 10
-            } else {
-                this.cameraOffset += 0.01
-            }
-            setCameraPos(vec2(0, this.cameraOffset))
-        } else if (this.catReached) {
-            this.countDown.set(0)
-        }
-
-        if (this.cat.getLives() <= 0) {
-            this.finished = true;
-        }
-
-        if (this.cat.groundObject instanceof PentHouse) {
-            setTimeout(() => this.finished = true, 1000)
-        }
+        super.update()
     }
 
-
     public draw(): void {
-        drawRect(vec2(0, 2 + this.cameraOffset), vec2(14, 23), Colors.darker_grey, 0, false);
-
-        // Draw building outline
-        drawLine(vec2(-7, -8.5), vec2(-7, 13 + this.cameraOffset), 0.1, Colors.white, false)
-        drawLine(vec2(7, -8.5), vec2(7, 13 + this.cameraOffset), 0.1, Colors.white, false)
-
-        drawDoor()
-
-        // const font = new FontImage(this.fontImg, vec2(16, 16), vec2(0, 0));
-        drawText("Locked out again!",
-            vec2(0, -1.5), 0.8, Colors.yellow,
-            0.1, new Color(0, 0, 0, 1),
-            'center',
-            fontDefault,
-            undefined,
-            mainContext);
-
-        drawText("I'll need to double jump\njust to reach these windows...",
-            vec2(0, 4.5), 0.8, Colors.yellow,
-            0.1, new Color(0, 0, 0, 1),
-            'center',
-            fontDefault,
-            undefined,
-            mainContext);
+        super.draw()
 
         drawText("This building is huge!\nHow high can I climb?",
             vec2(0, 10.5), 0.8, Colors.yellow,

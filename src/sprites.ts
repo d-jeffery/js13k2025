@@ -2,7 +2,7 @@ import {
     cameraPos, type Color,
     drawCircle, drawEllipse, drawLine, drawPoly, drawRect, drawText,
     EngineObject, fontDefault, gamepadStick, gamepadWasPressed, gamepadWasReleased, isUsingGamepad, keyDirection,
-    keyWasPressed, keyWasReleased, mainContext, ParticleEmitter, rand, RandomGenerator,
+    keyWasPressed, keyWasReleased, mainContext, ParticleEmitter, rand, RandomGenerator, Sound,
     tile, time, Timer, vec2, type Vector2, worldToScreen
 } from "littlejsengine";
 import {drawCircleSegment} from "./draw.ts";
@@ -177,7 +177,7 @@ class Destructible extends EngineObject {
         super.update();
 
         if (this.pos.y < -10) {
-            // new Sound([,,333,.01,0,.9,4,1.9,,,,,,.5,,.6]).play()
+            new Sound([,,333,.01,0,.9,4,1.9,,,,,,.5,,.6]).play()
             this.destroy()
         }
     }
