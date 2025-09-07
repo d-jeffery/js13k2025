@@ -2,7 +2,7 @@ import {
     cameraPos, type Color,
     drawCircle, drawEllipse, drawLine, drawPoly, drawRect, drawText,
     EngineObject, fontDefault, gamepadStick, gamepadWasPressed, gamepadWasReleased, isUsingGamepad, keyDirection,
-    keyWasPressed, keyWasReleased, mainContext, ParticleEmitter, RandomGenerator,
+    keyWasPressed, keyWasReleased, mainContext, ParticleEmitter, rand, RandomGenerator,
     tile, time, Timer, vec2, type Vector2, worldToScreen
 } from "littlejsengine";
 import {drawCircleSegment} from "./draw.ts";
@@ -280,6 +280,85 @@ export abstract class WindowSillBase extends EngineObject {
     abstract doesHavePlant(): boolean;
 }
 
+export class ClosedWindowSill extends WindowSillBase {
+    private readonly type: number;
+    protected readonly hasPlant: boolean;
+    protected lights: boolean;
+    protected reactTime: number
+    private someoneHome: boolean
+
+
+    constructor(pos: Vector2, size: Vector2, random: RandomGenerator) {
+        super(pos, size);
+        this.setCollision();
+        this.mass = 0;
+        this.renderOrder = BACKGROUND_LAYER;
+        this.type = Math.floor(Math.random() * 4) | WINDOW_TYPE_OPEN;
+        this.color = Colors.clear
+        this.hasPlant = false;
+        this.lights = false
+        this.reactTime = random.int(500, 1000)
+        this.someoneHome = random.int(0, 2) === 0
+
+
+        if (random.int(0, 5) < 4) {
+            const destructibleTiles = [1, 2, 3];
+            const tileIndex = destructibleTiles[random.int(0, destructibleTiles.length)];
+            new Destructible(vec2(pos.x, pos.y + 0.75), tileIndex);
+            this.hasPlant = true
+        }
+    }
+
+    protected renderWindowContents() {
+        switch (this.type) {
+            case WINDOW_TYPE_CLOSE:
+                drawLine(
+                    vec2(this.pos.x - 1.25, this.pos.y + 1.5),
+                    vec2(this.pos.x + 1.25, this.pos.y + 1.5),
+                    0.1, Colors.white, false);
+                drawLine(
+                    vec2(this.pos.x, this.pos.y + 2.75),
+                    vec2(this.pos.x, this.pos.y),
+                    0.1, Colors.white, false);
+                break;
+            case WINDOW_WITH_DRAPES:
+                drawCircleSegment(
+                    worldToScreen(vec2(this.pos.x - 1.25, this.pos.y + 2.75)),
+                    45,
+                    0,
+                    Math.PI / 2,
+                    Colors.grey)
+                drawCircleSegment(
+                    worldToScreen(vec2(this.pos.x + 1.25, this.pos.y + 2.75)),
+                    45,
+                    Math.PI / 2,
+                    Math.PI,
+                    Colors.grey)
+                break;
+            default:
+        }
+    }
+
+    public render() {
+        this.renderWindowBase(this.lights ? Colors.lightsOn : Colors.dark_grey, 1.5, 0.1)
+    }
+
+    public update() {
+        super.update()
+    }
+
+    public doesHavePlant(): boolean {
+        return this.hasPlant
+    }
+
+    public collideWithObject(object: EngineObject): boolean {
+        if (object instanceof Cat && object.velocity.y < 0 && this.hasPlant && this.someoneHome) {
+            setTimeout(() => this.lights = true, this.reactTime)
+        }
+        return true
+    }
+}
+
 export class WindowSillEnemy extends WindowSillBase {
     private bucketTimer: Timer;
     private stateTimer: Timer;
@@ -368,91 +447,14 @@ export class WindowSillEnemy extends WindowSillBase {
     }
 }
 
-export class ClosedWindowSill extends WindowSillBase {
-    private readonly type: number;
-    protected readonly hasPlant: boolean;
-    protected lights: boolean;
-    protected reactTime: number
-    private someoneHome: boolean
-
-
-    constructor(pos: Vector2, size: Vector2, random: RandomGenerator) {
-        super(pos, size);
-        this.setCollision();
-        this.mass = 0;
-        this.renderOrder = BACKGROUND_LAYER;
-        this.type = Math.floor(Math.random() * 4) | WINDOW_TYPE_OPEN;
-        this.color = Colors.clear
-        this.hasPlant = false;
-        this.lights = false
-        this.reactTime = random.int(500, 1000)
-        this.someoneHome = random.int(0, 2) === 0
-
-
-        if (random.int(0, 5) < 4) {
-            const destructibleTiles = [1, 2, 3];
-            const tileIndex = destructibleTiles[random.int(0, destructibleTiles.length)];
-            new Destructible(vec2(pos.x, pos.y + 0.75), tileIndex);
-            this.hasPlant = true
-        }
-    }
-
-    protected renderWindowContents() {
-        switch (this.type) {
-            case WINDOW_TYPE_CLOSE:
-                drawLine(
-                    vec2(this.pos.x - 1.25, this.pos.y + 1.5),
-                    vec2(this.pos.x + 1.25, this.pos.y + 1.5),
-                    0.1, Colors.white, false);
-                drawLine(
-                    vec2(this.pos.x, this.pos.y + 2.75),
-                    vec2(this.pos.x, this.pos.y),
-                    0.1, Colors.white, false);
-                break;
-            case WINDOW_WITH_DRAPES:
-                drawCircleSegment(
-                    worldToScreen(vec2(this.pos.x - 1.25, this.pos.y + 2.75)),
-                    45,
-                    0,
-                    Math.PI / 2,
-                    Colors.grey)
-                drawCircleSegment(
-                    worldToScreen(vec2(this.pos.x + 1.25, this.pos.y + 2.75)),
-                    45,
-                    Math.PI / 2,
-                    Math.PI,
-                    Colors.grey)
-                break;
-            default:
-        }
-    }
-
-    public render() {
-        this.renderWindowBase(this.lights ? Colors.lightsOn : Colors.dark_grey, 1.5, 0.1)
-    }
-
-    public update() {
-        super.update()
-    }
-
-    public doesHavePlant(): boolean {
-        return this.hasPlant
-    }
-
-    public collideWithObject(object: EngineObject): boolean {
-        if (object instanceof Cat && object.velocity.y < 0 && this.hasPlant && this.someoneHome) {
-            setTimeout(() => this.lights = true, this.reactTime)
-        }
-        return true
-    }
-}
-
-
 export class JumpScareEnemy extends ClosedWindowSill {
+
+    private timeout: boolean
 
     constructor(pos: Vector2, size: Vector2, random: RandomGenerator) {
         super(pos, size, random);
         this.lights = false
+        this.timeout = false
     }
 
     public update() {
@@ -460,6 +462,30 @@ export class JumpScareEnemy extends ClosedWindowSill {
     }
 
     protected renderWindowContents() {
+        if (!this.lights) {
+            return
+        }
+        drawCircleSegment(worldToScreen(vec2(this.pos.x, this.pos.y)), 45, Math.PI, 0, Colors.grey)
+
+        drawCircle(vec2(this.pos.x, this.pos.y + 1.25), 0.5,
+            Colors.skin)
+
+        drawLine(
+            vec2(this.pos.x + 0.05, this.pos.y + 1.25),
+            vec2(this.pos.x + 0.25, this.pos.y + 1.45), 0.1,
+            Colors.dark_grey, false)
+
+        drawLine(
+            vec2(this.pos.x - 0.05, this.pos.y + 1.25),
+            vec2(this.pos.x - 0.25, this.pos.y + 1.45), 0.1,
+            Colors.dark_grey, false)
+
+        drawCircle(vec2(this.pos.x - 0.75, this.pos.y + 0.5), 0.25,
+            Colors.skin)
+        drawCircle(vec2(this.pos.x + 0.75, this.pos.y + 0.5), 0.25,
+            Colors.skin)
+
+        drawText("Boo!!", vec2(this.pos.x, this.pos.y + 2), 0.8, Colors.white, 0.1, Colors.black)
     }
 
     public render() {
@@ -468,7 +494,15 @@ export class JumpScareEnemy extends ClosedWindowSill {
 
     public collideWithObject(object: EngineObject): boolean {
         if (object instanceof Cat && object.velocity.y < 0) {
-            setTimeout(() => this.lights = true, 750)
+            setTimeout(() => {
+                this.lights = true
+
+                if (object.groundObject === this && !this.timeout) {
+                    object.damage()
+                    this.timeout = true
+                }
+
+            }, rand(1000, 2000))
         }
         return true
     }
