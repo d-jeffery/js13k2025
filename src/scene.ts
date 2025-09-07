@@ -61,14 +61,14 @@ export class IntroScene extends Scene {
 
         // this.font = new FontImage(this.fontImg, vec2(16, 16), vec2(0, 0));
 
-/*        this.rain = new ParticleEmitter(vec2(6, 14), (5/4) * Math.PI, vec2(24,1), 0, 150, 0, tile(3, 16),
-            new Color(0.57, 0.72, 0.82, 0.75),
-            new Color(0.57, 0.72, 0.82, 0.75),
-            new Color(0.77, 0.88, 0.96, 0.5),
-            new Color(0.77, 0.88, 0.96, 0.5),
-            2, 0.15, 0.1, 0.25, 0.05, 1, 1, 1, 3.14, 0.1, 0.25, false, false);
+        /*        this.rain = new ParticleEmitter(vec2(6, 14), (5/4) * Math.PI, vec2(24,1), 0, 150, 0, tile(3, 16),
+                    new Color(0.57, 0.72, 0.82, 0.75),
+                    new Color(0.57, 0.72, 0.82, 0.75),
+                    new Color(0.77, 0.88, 0.96, 0.5),
+                    new Color(0.77, 0.88, 0.96, 0.5),
+                    2, 0.15, 0.1, 0.25, 0.05, 1, 1, 1, 3.14, 0.1, 0.25, false, false);
 
-        this.rain.renderOrder = 3*/
+                this.rain.renderOrder = 3*/
 
         // setCameraScale(50)
     }
@@ -160,29 +160,6 @@ export abstract class GameScene extends Scene {
         } else if (catPos.y > 1180) {
             this.finished = true;
         }
-
-        const catPosY = this.cat.pos.y
-        if (catPosY > 7 && !this.catReached) {
-            this.catReached = true
-        }
-
-        if (this.countDown.elapsed() && this.catReached) {
-            if (this.cameraOffset >= 70) {
-                // Dont progresses camera if at "top"
-            } else if (catPosY - this.cameraOffset >= 10) {
-                // this.cameraOffset = lerp(this.lerpY, catPosY - 10, catPosY)
-                this.cameraOffset = catPosY - 10
-            } else {
-                this.cameraOffset += 0.01
-            }
-            setCameraPos(vec2(0, this.cameraOffset))
-        } else if (this.catReached) {
-            this.countDown.set(0)
-        }
-
-        if (this.cat.getLives() <= 0) {
-            this.finished = true;
-        }
     }
 
     public draw() {
@@ -254,7 +231,32 @@ export class TutorialGameScene extends GameScene {
     }
 
     public update(): void {
-        super.update();
+
+        super.update()
+
+        const catPosY = this.cat.pos.y
+        if (catPosY > 7 && !this.catReached) {
+            this.catReached = true
+        }
+
+        if (this.countDown.elapsed() && this.catReached) {
+            if (this.cameraOffset >= 70) {
+                // Dont progresses camera if at "top"
+            } else if (catPosY - this.cameraOffset >= 10) {
+                // this.cameraOffset = lerp(this.lerpY, catPosY - 10, catPosY)
+                this.cameraOffset = catPosY - 10
+            } else {
+                this.cameraOffset += 0.01
+            }
+            setCameraPos(vec2(0, this.cameraOffset))
+        } else if (this.catReached) {
+            this.countDown.set(0)
+        }
+
+        if (this.cat.getLives() <= 0) {
+            this.finished = true;
+        }
+
 
         if (this.cat.groundObject instanceof PentHouse) {
             setTimeout(() => this.finished = true, 1000)
@@ -306,14 +308,14 @@ export class TutorialGameScene extends GameScene {
 export class EndlessGameScene extends GameScene {
 
     private building: EndlessBuilding;
-    private randomeGenerator: RandomGenerator;
+    private randomGenerator: RandomGenerator;
 
     constructor() {
         super();
 
-        this.randomeGenerator = new RandomGenerator(seed);
+        this.randomGenerator = new RandomGenerator(seed);
 
-        this.building = new EndlessBuilding(this.randomeGenerator);
+        this.building = new EndlessBuilding(this.randomGenerator);
 
         for (let i = 0; i < 5; i++) {
             this.building.addLevel();
@@ -324,12 +326,32 @@ export class EndlessGameScene extends GameScene {
 
     public update(): void {
 
-        if (this.cat.pos.y  + 5 > this.building.currentHeight()) {
+        if (this.cat.pos.y + 5 > this.building.currentHeight()) {
             this.building.addLevel();
-            console.log(this.cat.pos.y, this.building.currentHeight());
         }
 
         super.update()
+
+        const catPosY = this.cat.pos.y
+        if (catPosY > 7 && !this.catReached) {
+            this.catReached = true
+        }
+
+        if (this.countDown.elapsed() && this.catReached) {
+            if (catPosY - this.cameraOffset >= 10) {
+                // this.cameraOffset = lerp(this.lerpY, catPosY - 10, catPosY)
+                this.cameraOffset = catPosY - 10
+            } else {
+                this.cameraOffset += 0.01
+            }
+            setCameraPos(vec2(0, this.cameraOffset))
+        } else if (this.catReached) {
+            this.countDown.set(0)
+        }
+
+        if (this.cat.getLives() <= 0) {
+            this.finished = true;
+        }
     }
 
     public draw(): void {

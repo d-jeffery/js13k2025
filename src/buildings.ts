@@ -34,9 +34,9 @@ export class IntroBuilding extends Building {
 
         this.plantCount = 0;
 
-        const levels = [0, 1, 0, 1, 0, 1, 0, 2, 0, 3, 1, 4, 1, 6];
+        const levels = [0, 5, 0, 1, 0, 1, 0, 2, 0, 3, 1, 4, 1, 6];
         for (const [index, level] of levels.entries()) {
-            this.windows.push(...WindowConfigs[level](this.posx, this.posy * index, this.width, this.height, randomGenerator));
+            this.windows.push(...sillFactory(level, this.posx, this.posy * index, this.width, this.height, randomGenerator));
         }
 
        this.plantCount = this.windows.filter(w => w.doesHavePlant()).length
@@ -56,7 +56,7 @@ export class EndlessBuilding extends Building {
     }
 
     public addLevel() {
-        this.windows.push(...WindowConfigs[this.randomGenerator.int(0, 5)](this.posx, this.posy, this.width, this.height, this.randomGenerator));
+        this.windows.push(...sillFactory(this.randomGenerator.int(0, 6), this.posx, this.posy, this.width, this.height, this.randomGenerator));
         this.posy += 6
     }
 
@@ -65,60 +65,51 @@ export class EndlessBuilding extends Building {
     }
 }
 
-interface windowConfigOptions {
-    [key: number]: (posx: number, posy: number, width: number, height: number, random: RandomGenerator) => WindowSillBase[]
+const Configs = [
+    [ClosedWindowSill, ClosedWindowSill], // 0
+    [ClosedWindowSill, ClosedWindowSill, ClosedWindowSill], // 1
+    [ClosedWindowSill, WindowSillEnemy, ClosedWindowSill], // 2
+    [ClosedWindowSill, WindowSillEnemy], // 3
+    [WindowSillEnemy, ClosedWindowSill, WindowSillEnemy], // 4
+    [ClosedWindowSill, ClosedWindowSill, JumpScareEnemy], // 5
+    [PentHouse] // 6
+]
+
+function createSill(SillClass: any, x: number, y: number, width: number, height: number, random: RandomGenerator) {
+    return new SillClass(vec2(x, y), vec2(width, height), random)
 }
 
-const WindowConfigs: windowConfigOptions = {
-    0: (posx: number, posy: number, width: number, height: number, random: RandomGenerator): WindowSillBase[] => {
-        return [
-            createSill(ClosedWindowSill, -posx + width, posy, width, height, random),
-            createSill(ClosedWindowSill, posx - width, posy, width, height, random),
-        ]
-    },
-    1: (posx: number, posy: number, width: number, height: number, random: RandomGenerator): WindowSillBase[] => {
-        return [
-            createSill(ClosedWindowSill, -posx, posy, width, height, random),
-            createSill(ClosedWindowSill, 0, posy, width, height, random),
-            createSill(ClosedWindowSill, posx, posy, width, height, random)
-        ]
-    },
-    2: (posx: number, posy: number, width: number, height: number, random: RandomGenerator): WindowSillBase[] => {
-        return [
-            createSill(ClosedWindowSill, -posx, posy, width, height, random),
-            createSill(WindowSillEnemy, 0, posy, width, height),
-            createSill(ClosedWindowSill, posx, posy, width, height, random)
-        ]
-    },
-    3: (posx: number, posy: number, width: number, height: number, random: RandomGenerator): WindowSillBase[] => {
-        return [
-            createSill(ClosedWindowSill, -posx + width, posy, width, height, random),
-            createSill(WindowSillEnemy, posx - width, posy, width, height),
-        ]
-    },
-    4: (posx: number, posy: number, width: number, height: number, random: RandomGenerator): WindowSillBase[] => {
-        return [
-            createSill(WindowSillEnemy, -posx, posy, width, height),
-            createSill(ClosedWindowSill, 0, posy, width, height, random),
-            createSill(WindowSillEnemy, posx, posy, width, height)
-        ]
-    },
-    5: (posx: number, posy: number, width: number, height: number, random: RandomGenerator): WindowSillBase[] => {
-        return [
-            createSill(ClosedWindowSill, -posx, posy, width, height, random),
-            createSill(ClosedWindowSill, 0, posy, width, height, random),
-            createSill(JumpScareEnemy, posx, posy, width, height, random)
-        ]
-    },
-    6: (_: number, posy: number, width: number, height: number): WindowSillBase[] => {
-        return [
-            createSill(PentHouse, 0, posy, width * 3, height)
-        ]
+function sillFactory(level: number, posx: number, posy: number, width: number, height: number, random: RandomGenerator): WindowSillBase[] {
+
+    const sills = [];
+
+    // const arr = shuffleArray(Configs[level], random);
+
+    const arr = Configs[level]
+
+    switch (arr.length) {
+        case 1:
+            sills.push(createSill(arr[0], 0, posy, width * 3, height, random))
+            break;
+        case 2:
+            sills.push(createSill(arr[0], -posx + width, posy, width, height, random))
+            sills.push(createSill(arr[1], posx - width, posy, width, height, random))
+            break;
+        case 3:
+            sills.push(createSill(arr[0], -posx, posy, width, height, random))
+            sills.push(createSill(arr[1], 0, posy, width, height, random))
+            sills.push(createSill(arr[2], posx, posy, width, height, random))
+            break;
+        default:
     }
+    return sills;
 }
 
-function createSill(SillClass: any, x: number, y: number, width: number, height: number, random?: RandomGenerator) {
-    return random
-        ? new SillClass(vec2(x, y), vec2(width, height), random)
-        : new SillClass(vec2(x, y), vec2(width, height));
-}
+/*
+function shuffleArray(array: any[], randomGenerator: RandomGenerator) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(randomGenerator.int(0, 1) * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}*/

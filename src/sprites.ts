@@ -453,11 +453,13 @@ export class WindowSillEnemy extends WindowSillBase {
 export class JumpScareEnemy extends ClosedWindowSill {
 
     private timeout: boolean
+    private timeoutSet: boolean
 
     constructor(pos: Vector2, size: Vector2, random: RandomGenerator) {
         super(pos, size, random);
         this.lights = false
         this.timeout = false
+        this.timeoutSet = false
     }
 
     public update() {
@@ -495,19 +497,30 @@ export class JumpScareEnemy extends ClosedWindowSill {
         this.renderWindowBase(this.lights ? Colors.lightsOn : Colors.grey, 1.5, 0.1)
     }
 
+    // TODO: fix multiple collisions
     public collideWithObject(object: EngineObject): boolean {
-        if (object instanceof Cat && object.velocity.y < 0) {
+        if (object instanceof Cat && object.velocity.y < 0 && !this.timeout && !this.timeoutSet) {
+            this.timeoutSet = true
+
             setTimeout(() => {
+                console.log("Jump Scare!");
                 this.lights = true
 
                 if (object.groundObject === this && !this.timeout) {
                     object.damage()
                     this.timeout = true
                 }
-
+                setTimeout(() => {
+                    this.lights = false
+                    this.timeout = false
+                    this.timeoutSet = false
+                }, 5000)
             }, rand(1000, 2000))
+            return true
+        } else if (object instanceof Cat) {
+            return true
         }
-        return true
+        return false
     }
 }
 
