@@ -207,7 +207,10 @@ export class TutorialGameScene extends Scene {
         const catPos = worldToScreen(this.cat.pos)
 
         // End the scene if the cat goes off the bottom of the screen
-        if (catPos.y > 1180) {
+        if (catPos.y > 1180 && this.cat.getLives() > 0) {
+            this.cat.damage()
+            this.cat.respawn()
+        } else if (catPos.y > 1180) {
             this.finished = true;
         }
 
@@ -356,7 +359,10 @@ export class EndlessGameScene extends Scene {
         const catPos = worldToScreen(this.cat.pos)
 
         // End the scene if the cat goes off the bottom of the screen
-        if (catPos.y > 1180) {
+        if (catPos.y > 1180 && this.cat.getLives() > 0) {
+            this.cat.damage()
+            this.cat.respawn()
+        } else if (catPos.y > 1180) {
             this.finished = true;
         }
 
@@ -413,7 +419,7 @@ export class EndlessGameScene extends Scene {
             undefined,
             mainContext);
 
-        drawText("This building is huge!\nHow far can I go?",
+        drawText("This building is huge!\nHow high can I climb?",
             vec2(0, 10.5), 0.8, Colors.yellow,
             0.1, new Color(0, 0, 0, 1),
             'center',

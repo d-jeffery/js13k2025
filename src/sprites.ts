@@ -24,6 +24,8 @@ export class Cat extends EngineObject {
     private score: number;
     private lives: number;
     private lastFrames: Vector2[];
+    private lastGround: EngineObject | undefined
+    private flashInterval: NodeJS.Timeout | undefined
 
     constructor(pos: Vector2 = vec2(0, 0)) {
         super(pos);
@@ -45,6 +47,28 @@ export class Cat extends EngineObject {
         this.score = 0;
         this.lives = 9;
         this.lastFrames = []
+        this.lastGround = undefined
+
+        this.flashInterval = undefined
+    }
+
+    public respawn(): void {
+        this.pos = vec2(this.lastGround!.pos.x, this.lastGround!.pos.y + 1);
+        // Set flashing
+        this.flashInterval = setInterval(() => {
+            if (this.color.a < 1) {
+                this.color.set(this.color.r, this.color.g, this.color.b, 1);
+            } else {
+                this.color.set(this.color.r, this.color.g, this.color.b, 0.2);
+            }
+        }, 100);
+        // Set timeout to stop flashing after 1 second
+        setTimeout(() => {
+            if (this.flashInterval) {
+                clearInterval(this.flashInterval);
+                this.flashInterval = undefined;
+            }
+        }, 1000)
     }
 
     public getLives(): number {
@@ -82,6 +106,7 @@ export class Cat extends EngineObject {
         // Reset jump count when touching the ground
         if (this.groundObject) {
             this.jumpCount = 0
+            this.lastGround = this.groundObject
         } else if (this.jumpCount === 0 && this.velocity.y < 0) {
             // If the cat is falling and hasn't jumped yet, it means it has just left the ground,
             // so we set the jump count to 1 to allow for a double jump.
