@@ -14,6 +14,8 @@ const CAT_LAYER = 1;
 const DESTRUCTIBLE_LAYER = 2;
 const WATER_LAYER = 3;
 
+const EFFECT_VOL = 0.5
+
 
 // The player-controlled cat
 export class Cat extends EngineObject {
@@ -53,6 +55,8 @@ export class Cat extends EngineObject {
     }
 
     public setFlashing(): void {
+        clearInterval(this.flashInterval);
+
         this.flashInterval = setInterval(() => {
             if (this.color.a < 1) {
                 this.color.set(this.color.r, this.color.g, this.color.b, 1);
@@ -65,6 +69,7 @@ export class Cat extends EngineObject {
             if (this.flashInterval) {
                 clearInterval(this.flashInterval);
                 this.flashInterval = undefined;
+                this.color.set(this.color.r, this.color.g, this.color.b, 1);
             }
         }, 1000)
     }
@@ -80,6 +85,7 @@ export class Cat extends EngineObject {
     public damage(): void {
         this.lives -= 1
         this.setFlashing()
+        new Sound([1.1,,397,.01,.03,.09,3,1.2,1,,,,,,,.1,,.8,.04]).play(this.pos, EFFECT_VOL); // Meow
     }
 
     public addToScore(points: number): void {
@@ -122,12 +128,14 @@ export class Cat extends EngineObject {
             this.velocity = vec2(this.velocity.x, this.jumpSpeed);
             this.canDoubleJump = false;
             this.jumpCount += 1
+            new Sound([.6,,449,.02,.1,.3,1,2.9,30,,,,,.9,,,,.1,.03,,-1054]).play(this.pos, EFFECT_VOL); // Jump 1
         } else if (jumpReleased && this.jumpCount === 1) {
             this.canDoubleJump = true
             this.jumpCount += 1
         } else if (jumpButtonPressed && this.jumpCount === 0) {
             this.velocity = vec2(this.velocity.x, this.jumpSpeed);
             this.jumpCount += 1;
+            // new Sound([1.1,,397,.01,.03,.09,3,1.2,1,,,,,,,.1,,.8,.04]).play(this.pos, EFFECT_VOL); // Jump 0
         }
     }
 
@@ -177,7 +185,7 @@ class Destructible extends EngineObject {
         super.update();
 
         if (this.pos.y < -10) {
-            new Sound([,,333,.01,0,.9,4,1.9,,,,,,.5,,.6]).play()
+            new Sound([.6,,500,.02,.09,.01,3,1.5,,,,,,.6,35,.4,,.42,.09,,1303]).play(this.pos, EFFECT_VOL); // Hit 3
             this.destroy()
         }
     }
@@ -192,6 +200,7 @@ class Destructible extends EngineObject {
             this.mass = 1
             this.angleVelocity = (Math.random() - 0.5) * 0.2
             object.addToScore(1)
+            new Sound([,,129,.01,,.15,,,,,,,,5]).play(object.pos, EFFECT_VOL) // Hit
             return true;
         }
         return false;
@@ -226,6 +235,8 @@ class Water extends EngineObject {
 
             setTimeout(() => emitter.destroy(), 250)
 
+            new Sound([,.2,40,.5,,1.5,,11,,,,,,199]).play(object.pos, EFFECT_VOL)
+
             object.damage();
             this.destroy()
             return true;
@@ -253,12 +264,15 @@ const STATE_TIME = 2.5
 const BUCKET_STATE = 2.5
 
 export abstract class WindowSillBase extends EngineObject {
-    constructor(pos: Vector2, size: Vector2) {
+    protected floor: number
+
+    protected constructor(pos: Vector2, size: Vector2, floor: number) {
         super(pos, size);
         this.setCollision();
         this.mass = 0;
         this.renderOrder = BACKGROUND_LAYER;
         this.color = Colors.clear
+        this.floor = floor
     }
 
     protected abstract renderWindowContents(): void
@@ -280,6 +294,10 @@ export abstract class WindowSillBase extends EngineObject {
         );
     }
 
+    public getFloor(): number {
+        return this.floor
+    }
+
     abstract doesHavePlant(): boolean;
 }
 
@@ -291,8 +309,8 @@ export class ClosedWindowSill extends WindowSillBase {
     private someoneHome: boolean
 
 
-    constructor(pos: Vector2, size: Vector2, random: RandomGenerator) {
-        super(pos, size);
+    constructor(pos: Vector2, size: Vector2, floor: number, random: RandomGenerator) {
+        super(pos, size, floor);
         this.setCollision();
         this.mass = 0;
         this.renderOrder = BACKGROUND_LAYER;
@@ -367,8 +385,8 @@ export class WindowSillEnemy extends WindowSillBase {
     private stateTimer: Timer;
     private state: boolean;
 
-    constructor(pos: Vector2, size: Vector2) {
-        super(pos, size);
+    constructor(pos: Vector2, size: Vector2, floor: number) {
+        super(pos, size, floor);
         this.setCollision();
         this.mass = 0;
         this.renderOrder = BACKGROUND_LAYER;
@@ -455,8 +473,8 @@ export class JumpScareEnemy extends ClosedWindowSill {
     private timeout: boolean
     private timeoutSet: boolean
 
-    constructor(pos: Vector2, size: Vector2, random: RandomGenerator) {
-        super(pos, size, random);
+    constructor(pos: Vector2, size: Vector2, floor: number, random: RandomGenerator) {
+        super(pos, size, floor, random);
         this.lights = false
         this.timeout = false
         this.timeoutSet = false
@@ -494,7 +512,7 @@ export class JumpScareEnemy extends ClosedWindowSill {
     }
 
     public render() {
-        this.renderWindowBase(this.lights ? Colors.lightsOn : Colors.grey, 1.5, 0.1)
+        this.renderWindowBase(this.lights ? Colors.lightsOn : Colors.dark_grey, 1.5, 0.1)
     }
 
     // TODO: fix multiple collisions
@@ -503,12 +521,13 @@ export class JumpScareEnemy extends ClosedWindowSill {
             this.timeoutSet = true
 
             setTimeout(() => {
-                console.log("Jump Scare!");
                 this.lights = true
+                new Sound([1.1,,100,.01,.4,.01,2,3.1,43,,-108,.37,,,.4,,,.6,,.03]).play(this.pos, EFFECT_VOL); // Blip 8
 
                 if (object.groundObject === this && !this.timeout) {
                     object.damage()
                     this.timeout = true
+                    object.velocity.y = 0.3 // Scared!
                 }
                 setTimeout(() => {
                     this.lights = false
@@ -526,8 +545,8 @@ export class JumpScareEnemy extends ClosedWindowSill {
 
 export class PentHouse extends WindowSillBase {
 
-    constructor(pos: Vector2, size: Vector2) {
-        super(pos, size);
+    constructor(pos: Vector2, size: Vector2, floor: number) {
+        super(pos, size, floor);
     }
 
     protected renderWindowContents(): void {
