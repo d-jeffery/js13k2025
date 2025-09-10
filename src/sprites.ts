@@ -464,7 +464,6 @@ export class WindowSillEnemy extends WindowSillBase {
 
             new Water(this.pos)
 
-            // water.color = new Color(0.5, 0.5, 1, 1)
         } else if (this.bucketTimer.isSet() && this.bucketTimer.elapsed()) {
             this.state = false
             this.stateTimer.set(STATE_TIME)
@@ -477,20 +476,21 @@ export class WindowSillEnemy extends WindowSillBase {
     }
 }
 
-export class JumpScareEnemy extends ClosedWindowSill {
+export class JumpScareEnemy extends WindowSillBase {
 
+    private lights: boolean
     private timeout: boolean
     private timeoutSet: boolean
 
     constructor(pos: Vector2, size: Vector2, floor: number, random: RandomGenerator) {
-        super(pos, size, floor, random);
+        super(pos, size, floor);
         this.lights = false
         this.timeout = false
         this.timeoutSet = false
-    }
 
-    public update() {
-        super.update()
+        const destructibleTiles = [1, 2, 3];
+        const tileIndex = destructibleTiles[random.int(0, destructibleTiles.length)];
+        new Destructible(vec2(pos.x, pos.y + 0.75), tileIndex);
     }
 
     protected renderWindowContents() {
@@ -549,6 +549,10 @@ export class JumpScareEnemy extends ClosedWindowSill {
             return true
         }
         return false
+    }
+
+    public doesHavePlant(): boolean {
+        return true;
     }
 }
 

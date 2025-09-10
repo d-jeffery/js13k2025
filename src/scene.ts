@@ -231,7 +231,6 @@ export class TutorialGameScene extends GameScene {
     }
 
     public update(): void {
-
         super.update()
 
         const catPosY = this.cat.pos.y
@@ -242,9 +241,8 @@ export class TutorialGameScene extends GameScene {
         if (this.countDown.elapsed() && this.catReached) {
             if (this.cameraOffset >= 70) {
                 // Dont progresses camera if at "top"
-            } else if (catPosY - this.cameraOffset >= 10) {
-                // this.cameraOffset = lerp(this.lerpY, catPosY - 10, catPosY)
-                this.cameraOffset = catPosY - 10
+            } else if (catPosY - this.cameraOffset >= 7) {
+                this.cameraOffset = catPosY - 7
             } else {
                 this.cameraOffset += 0.01
             }
@@ -326,7 +324,7 @@ export class EndlessGameScene extends GameScene {
 
     public update(): void {
 
-        if (this.cat.pos.y + 5 > this.building.currentHeight()) {
+        if (this.cat.pos.y + 25 > this.building.currentHeight()) {
             this.building.addLevel();
         }
 
@@ -338,9 +336,8 @@ export class EndlessGameScene extends GameScene {
         }
 
         if (this.countDown.elapsed() && this.catReached) {
-            if (catPosY - this.cameraOffset >= 10) {
-                // this.cameraOffset = lerp(this.lerpY, catPosY - 10, catPosY)
-                this.cameraOffset = catPosY - 10
+            if (catPosY - this.cameraOffset >= 7) {
+                this.cameraOffset = catPosY - 7
             } else {
                 this.cameraOffset += 0.01
             }
@@ -374,7 +371,7 @@ export class EndlessGameScene extends GameScene {
         drawText("Smashables: " + this.cat.getScore(),
             vec2(0, -10.5 + this.cameraOffset),
             0.8, Colors.yellow,
-            0.2, new Color(0, 0, 0, 1),
+            0.2, Colors.black,
             'center',
             fontDefault,
             undefined,
@@ -383,7 +380,7 @@ export class EndlessGameScene extends GameScene {
         drawText("Lives: " + this.cat.getLives(),
             vec2(0, -11.5 + this.cameraOffset),
             0.8, Colors.yellow,
-            0.2, new Color(0, 0, 0, 1),
+            0.2, Colors.black,
             'center',
             fontDefault,
             undefined,
@@ -409,10 +406,10 @@ export class EndScene extends Scene {
     protected finished: boolean;
     private restartButton: Button;
     private mainMenuButton: Button;
-    private endless: boolean;
-    private smashed: number;
-    private floor: number;
-    private seed: number;
+    private readonly endless: boolean;
+    private readonly smashed: number;
+    private readonly floor: number;
+    private readonly seed: number;
 
     constructor(endless: boolean = false, seed:number, smashed: number = 0, floor: number = 0) {
         super();
