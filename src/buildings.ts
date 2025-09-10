@@ -9,7 +9,7 @@ export class Building {
     protected width: number
     protected height: number
     protected randomGenerator: RandomGenerator
-    protected floor: number = 0;
+    protected floor: number = 1;
 
     constructor(randomGenerator: RandomGenerator) {
         this.windows = [];
@@ -37,6 +37,7 @@ export class IntroBuilding extends Building {
 
         const levels = [0, 1, 0, 1, 0, 1, 0, 2, 0, 3, 1, 4, 1, 6];
         for (const [index, level] of levels.entries()) {
+            this.floor++
             this.windows.push(...sillFactory(level, this.posx, this.posy * index, this.width, this.height, this.floor, randomGenerator));
         }
 
@@ -57,6 +58,7 @@ export class EndlessBuilding extends Building {
     }
 
     public addLevel() {
+        this.floor++
         this.windows.push(...sillFactory(this.randomGenerator.int(0, 6), this.posx, this.posy, this.width, this.height, this.floor, this.randomGenerator));
         this.posy += 6
     }

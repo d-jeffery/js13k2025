@@ -7,6 +7,7 @@ export const Colors = {
     grey: new Color(0.5,0.5,0.5,1),
     dark_grey: new Color(0.25,0.25,0.25,1),
     darker_grey: new Color(0.1,0.1,0.1,1),
+    building: new Color(0.15, 0.15, 0.15, 1),
     black: new Color(0,0,0,1),
     yellow: new Color(1,1,0,1),
     lightsOn: new Color(1, 1, 0.38, 1),

@@ -163,7 +163,7 @@ export abstract class GameScene extends Scene {
     }
 
     public draw() {
-        drawRect(vec2(0, 2 + this.cameraOffset), vec2(14, 23), Colors.darker_grey, 0, false);
+        drawRect(vec2(0, 2 + this.cameraOffset), vec2(14, 23), Colors.building, 0, false);
 
         // Draw building outline
         drawLine(vec2(-7, -8.5), vec2(-7, 13 + this.cameraOffset), 0.1, Colors.white, false)
@@ -300,7 +300,7 @@ export class TutorialGameScene extends GameScene {
     }
 
     public getNextScene(): Scene {
-        return new EndScene(false)
+        return new EndScene(false, seed, this.cat.getScore(), this.cat.getFloorsClimbed())
     }
 
 }
@@ -391,7 +391,7 @@ export class EndlessGameScene extends GameScene {
     }
 
     public getNextScene(): Scene {
-        return new EndScene(true)
+        return new EndScene(true, seed, this.cat.getScore(), this.cat.getFloorsClimbed())
     }
 
     public isFinished(): boolean {
@@ -410,22 +410,33 @@ export class EndScene extends Scene {
     private restartButton: Button;
     private mainMenuButton: Button;
     private endless: boolean;
+    private smashed: number;
+    private floor: number;
+    private seed: number;
 
-    constructor(endless: boolean = false) {
+    constructor(endless: boolean = false, seed:number, smashed: number = 0, floor: number = 0) {
         super();
 
         this.finished = false
         this.endless = endless;
+        this.smashed = smashed;
+        this.floor = floor;
+        this.seed = seed;
 
-        this.restartButton = new Button("Restart", vec2(0, 0), vec2(14, 2));
-        this.mainMenuButton = new Button("Main Menu", vec2(0, -3), vec2(14, 2));
+        this.restartButton = new Button("Restart", vec2(0, -2), vec2(14, 2));
+        this.mainMenuButton = new Button("Main Menu", vec2(0, -5), vec2(14, 2));
 
         this.nextScene = undefined
     }
 
     public draw(): void {
         drawText("Game Over!",
-            vec2(0, 6), 2.4, Colors.yellow,
+            vec2(0, 8), 2.4, Colors.yellow,
+            0.1, Colors.black,
+            'center');
+
+        drawText(`Seed: ${this.seed}\n\nSmashed: ${this.smashed} things\n\nFloors Climbed: ${this.floor}`,
+            vec2(0, 3), 1.2, Colors.yellow,
             0.1, Colors.black,
             'center');
 

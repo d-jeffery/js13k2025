@@ -25,6 +25,7 @@ export class Cat extends EngineObject {
     private jumpCount: number;
     private score: number;
     private lives: number;
+    private climbed: number;
     private lastFrames: Vector2[];
     private lastGround: EngineObject | undefined
     private flashInterval: NodeJS.Timeout | undefined
@@ -50,6 +51,7 @@ export class Cat extends EngineObject {
         this.lives = 9;
         this.lastFrames = []
         this.lastGround = undefined
+        this.climbed = 0;
 
         this.flashInterval = undefined
     }
@@ -114,6 +116,9 @@ export class Cat extends EngineObject {
 
         // Reset jump count when touching the ground
         if (this.groundObject) {
+            if (this.groundObject instanceof WindowSillBase) {
+                this.climbed = Math.max(this.groundObject.getFloor(), this.climbed);
+            }
             this.jumpCount = 0
             this.lastGround = this.groundObject
         } else if (this.jumpCount === 0 && this.velocity.y < 0) {
@@ -168,6 +173,10 @@ export class Cat extends EngineObject {
 
         super.render();
 
+    }
+
+    public getFloorsClimbed() {
+        return this.climbed;
     }
 }
 
