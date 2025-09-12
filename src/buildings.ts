@@ -35,7 +35,13 @@ export class IntroBuilding extends Building {
 
         this.plantCount = 0;
 
-        const levels = [0, 1, 0, 1, 0, 1, 0, 2, 0, 3, 1, 4, 1, 6];
+        // const levels = [0, 1, 0, 1, 0, 1, 0, 2, 0, 3, 1, 4, 1, 6];
+        // const levels = [0, 2, 1, 2, 0, 1, 3, 1, 4, 2, 5, 2, 6, 3, 10];
+
+        ///const levels = [0, 2, 1, 2, 0, 2, 0, 1, 0, 4, 2, 6, 2, 10];
+
+        const levels = [1, 3, 6, 10, 13, 11, 0, 4, 0, 5, 13, 9, 12, 14]
+
         for (const [index, level] of levels.entries()) {
             this.floor++
             this.windows.push(...sillFactory(level, this.posx, this.posy * index, this.width, this.height, this.floor, randomGenerator));
@@ -68,14 +74,25 @@ export class EndlessBuilding extends Building {
     }
 }
 
+// const levels = [0, 2, 1, 2, 0, 1, 0, 3, 1, 4, 2, 5, 2, 10;
+// const levels = [0, 1, 0, 1, 0, 1, 0, 2, 0, 3, 1, 4, 1, 6];
+
 const Configs = [
-    [ClosedWindowSill, JumpScareEnemy], // 0
-    [ClosedWindowSill, ClosedWindowSill, ClosedWindowSill], // 1
-    [ClosedWindowSill, WindowSillEnemy, ClosedWindowSill], // 2
-    [ClosedWindowSill, WindowSillEnemy], // 3
-    [WindowSillEnemy, ClosedWindowSill, WindowSillEnemy], // 4
-    [ClosedWindowSill, ClosedWindowSill, JumpScareEnemy], // 5
-    [PentHouse] // 6
+    [ClosedWindowSill, ClosedWindowSill], // 0
+    [ClosedWindowSill, JumpScareEnemy], // 1
+    [JumpScareEnemy, ClosedWindowSill], // 2
+    [ClosedWindowSill, ClosedWindowSill, ClosedWindowSill], // 3
+    [ClosedWindowSill, WindowSillEnemy, ClosedWindowSill], // 4
+    [ClosedWindowSill, WindowSillEnemy], // 5
+    [WindowSillEnemy, ClosedWindowSill], // 6
+    [WindowSillEnemy, ClosedWindowSill, ClosedWindowSill], // 7
+    [ClosedWindowSill, ClosedWindowSill, WindowSillEnemy], // 8
+    [WindowSillEnemy, ClosedWindowSill, WindowSillEnemy], // 9
+    [ClosedWindowSill, ClosedWindowSill, JumpScareEnemy], // 10
+    [JumpScareEnemy, ClosedWindowSill, ClosedWindowSill], // 11
+    [ClosedWindowSill, JumpScareEnemy, ClosedWindowSill], // 12
+    [ClosedWindowSill, ClosedWindowSill, ClosedWindowSill], // 13
+    [PentHouse] // 14
 ]
 
 function createSill(SillClass: any, x: number, y: number, width: number, height: number, floor:number, random: RandomGenerator) {

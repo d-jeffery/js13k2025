@@ -106,6 +106,10 @@ export class Cat extends EngineObject {
             this.lastFrames.shift()
         }
 
+        if (this.getLives() <= 0) {
+            return;
+        }
+
         const moveInput = isUsingGamepad ? gamepadStick(0) : keyDirection()
         if (moveInput.x !== 0) {
             this.velocity = vec2(moveInput.x * this.speed, this.velocity.y);
@@ -177,6 +181,10 @@ export class Cat extends EngineObject {
 
     public getFloorsClimbed() {
         return this.climbed;
+    }
+
+    public getLastGround(): EngineObject | undefined {
+        return this.lastGround
     }
 }
 
@@ -312,10 +320,10 @@ export abstract class WindowSillBase extends EngineObject {
 
 export class ClosedWindowSill extends WindowSillBase {
     private readonly type: number;
-    protected readonly hasPlant: boolean;
+    protected plant: Destructible | undefined;
     protected lights: boolean;
     protected reactTime: number
-    private someoneHome: boolean
+    private readonly someoneHome: boolean
 
 
     constructor(pos: Vector2, size: Vector2, floor: number, random: RandomGenerator) {
@@ -325,7 +333,6 @@ export class ClosedWindowSill extends WindowSillBase {
         this.renderOrder = BACKGROUND_LAYER;
         this.type = Math.floor(Math.random() * 4) | WINDOW_TYPE_OPEN;
         this.color = Colors.clear
-        this.hasPlant = false;
         this.lights = false
         this.reactTime = random.int(500, 1000)
         this.someoneHome = random.int(0, 2) === 0
@@ -334,8 +341,7 @@ export class ClosedWindowSill extends WindowSillBase {
         if (random.int(0, 5) < 4) {
             const destructibleTiles = [1, 2, 3];
             const tileIndex = destructibleTiles[random.int(0, destructibleTiles.length)];
-            new Destructible(vec2(pos.x, pos.y + 0.75), tileIndex);
-            this.hasPlant = true
+            this.plant = new Destructible(vec2(pos.x, pos.y + 0.75), tileIndex);
         }
     }
 
@@ -375,17 +381,14 @@ export class ClosedWindowSill extends WindowSillBase {
 
     public update() {
         super.update()
+
+        if (this.plant?.destroyed && this.someoneHome) {
+            setTimeout(() => this.lights = true, this.reactTime)
+        }
     }
 
     public doesHavePlant(): boolean {
-        return this.hasPlant
-    }
-
-    public collideWithObject(object: EngineObject): boolean {
-        if (object instanceof Cat && object.velocity.y < 0 && this.hasPlant && this.someoneHome) {
-            setTimeout(() => this.lights = true, this.reactTime)
-        }
-        return true
+        return this.plant !== undefined
     }
 }
 

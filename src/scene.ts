@@ -133,6 +133,7 @@ export abstract class GameScene extends Scene {
     protected cameraOffset: number;
     protected catReached: boolean;
     protected finished: boolean;
+    protected dying: boolean;
 
     protected constructor() {
         super()
@@ -143,6 +144,7 @@ export abstract class GameScene extends Scene {
         this.catReached = false;
         this.nextScene = undefined;
         this.finished = false;
+        this.dying = false;
 
         new Ground(vec2(0, -8.5), vec2(16, 0.5));
 
@@ -152,13 +154,20 @@ export abstract class GameScene extends Scene {
     public update() {
 
         const catPos = worldToScreen(this.cat.pos)
+        const boundary = 1180;
+
+        // If ground the cat is on disappears off the bottom of the screen, it should die
+        const ground = this.cat.getLastGround()
+        const groundPos = ground ? worldToScreen(ground.pos) : vec2(0, 0)
 
         // End the scene if the cat goes off the bottom of the screen
-        if (catPos.y > 1180 && this.cat.getLives() > 0) {
-            this.cat.damage()
-            this.cat.respawn()
-        } else if (catPos.y > 1180) {
+        if (catPos.y > boundary && groundPos.y > boundary) {
             this.finished = true;
+        } else if (catPos.y > boundary && this.cat.getLives() > 0) {
+            this.cat.damage()
+            if (this.cat.getLives() > 0) {
+                this.cat.respawn()
+            }
         }
     }
 
@@ -251,10 +260,13 @@ export class TutorialGameScene extends GameScene {
             this.countDown.set(0)
         }
 
-        if (this.cat.getLives() <= 0) {
-            this.finished = true;
+        if (this.cat.getLives() <= 0 && !this.dying) {
+            this.dying = true
+            this.cat.setFlashing()
+            setTimeout(() => {
+                this.finished = true;
+            }, 1000)
         }
-
 
         if (this.cat.groundObject instanceof PentHouse) {
             setTimeout(() => this.finished = true, 1000)
