@@ -40,7 +40,7 @@ export class IntroBuilding extends Building {
 
         ///const levels = [0, 2, 1, 2, 0, 2, 0, 1, 0, 4, 2, 6, 2, 10];
 
-        const levels = [1, 3, 6, 10, 13, 11, 0, 4, 0, 5, 13, 9, 12, 14]
+        const levels = [1, 3, 6, 10, 3, 11, 0, 4, 0, 5, 3, 9, 12, 13]
 
         for (const [index, level] of levels.entries()) {
             this.floor++
@@ -65,7 +65,7 @@ export class EndlessBuilding extends Building {
 
     public addLevel() {
         this.floor++
-        this.windows.push(...sillFactory(this.randomGenerator.int(0, 6), this.posx, this.posy, this.width, this.height, this.floor, this.randomGenerator));
+        this.windows.push(...sillFactory(this.randomGenerator.int(13), this.posx, this.posy, this.width, this.height, this.floor, this.randomGenerator));
         this.posy += 6
     }
 
@@ -91,8 +91,7 @@ const Configs = [
     [ClosedWindowSill, ClosedWindowSill, JumpScareEnemy], // 10
     [JumpScareEnemy, ClosedWindowSill, ClosedWindowSill], // 11
     [ClosedWindowSill, JumpScareEnemy, ClosedWindowSill], // 12
-    [ClosedWindowSill, ClosedWindowSill, ClosedWindowSill], // 13
-    [PentHouse] // 14
+    [PentHouse] // 13
 ]
 
 function createSill(SillClass: any, x: number, y: number, width: number, height: number, floor:number, random: RandomGenerator) {

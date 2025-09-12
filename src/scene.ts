@@ -162,6 +162,7 @@ export abstract class GameScene extends Scene {
 
         // End the scene if the cat goes off the bottom of the screen
         if (catPos.y > boundary && groundPos.y > boundary) {
+            this.cat.damage()
             this.finished = true;
         } else if (catPos.y > boundary && this.cat.getLives() > 0) {
             this.cat.damage()
