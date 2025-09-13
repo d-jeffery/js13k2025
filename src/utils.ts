@@ -14,5 +14,6 @@ export const Colors = {
     brown: new Color(0.4, 0.22, 0.19, 1),
     skin: new Color(1, 0.65, 0.65, 1),
     clear: new Color(0,0,0,0),
-    waterBlue: new Color(0, 0, 1, 0.5)
+    waterBlue: new Color(0, 0, 1, 0.5),
+    warningRed: new Color(1,0,0,1)
 }

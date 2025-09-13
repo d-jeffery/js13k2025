@@ -1,7 +1,8 @@
 import {
     cameraPos, type Color,
     drawCircle, drawEllipse, drawLine, drawPoly, drawRect, drawText,
-    EngineObject, fontDefault, gamepadStick, gamepadWasPressed, gamepadWasReleased, isUsingGamepad, keyDirection,
+    EngineObject,
+    engineObjects, fontDefault, gamepadStick, gamepadWasPressed, gamepadWasReleased, isUsingGamepad, keyDirection,
     keyWasPressed, keyWasReleased, mainContext, ParticleEmitter, rand, RandomGenerator, Sound,
     tile, time, Timer, vec2, type Vector2, worldToScreen
 } from "littlejsengine";
@@ -177,6 +178,14 @@ export class Cat extends EngineObject {
                 (0.5),
                 Colors.black, 0.05,
                 Colors.darker_grey)
+        }
+
+        if (engineObjects
+            .filter(obj => obj instanceof Water)
+            .some((obj) => ((this.pos.x > obj.pos.x - 0.5) &&
+                ( this.pos.x < obj.pos.x + 0.5) && (this.pos.y < obj.pos.y)
+            ))) {
+            drawText("!!!", vec2(this.pos.x, this.pos.y + 1), 1.0, Colors.warningRed);
         }
 
         super.render();
