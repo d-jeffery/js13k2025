@@ -84,10 +84,14 @@ export class Cat extends EngineObject {
         return this.lives;
     }
 
-    public damage(): void {
+    public damage(kill: boolean = false): void {
         this.lives -= 1
         this.setFlashing()
-        new Sound([1.1,,397,.01,.03,.09,3,1.2,1,,,,,,,.1,,.8,.04]).play(this.pos, EFFECT_VOL); // Meow
+        if (this.lives <= 0 || kill) {
+            new Sound([1.1,,-397,.01,.03,.09,3,1.2,1,,,,,,,.1,,.8,.04]).play(this.pos, EFFECT_VOL); // Meow Sad;
+        } else if (this.lives > 0) {
+            new Sound([1.1, , 397, .01, .03, .09, 3, 1.2, 1, , , , , , , .1, , .8, .04]).play(this.pos, EFFECT_VOL); // Meow
+        }
     }
 
     public addToScore(points: number): void {
