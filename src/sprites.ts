@@ -182,8 +182,8 @@ export class Cat extends EngineObject {
 
         if (engineObjects
             .filter(obj => obj instanceof Water)
-            .some((obj) => ((this.pos.x > obj.pos.x - 0.5) &&
-                ( this.pos.x < obj.pos.x + 0.5) && (this.pos.y < obj.pos.y)
+            .some((obj) => ((this.pos.x > obj.pos.x - 1) &&
+                ( this.pos.x < obj.pos.x + 1) && (this.pos.y < obj.pos.y)
             ))) {
             drawText("!!!", vec2(this.pos.x, this.pos.y + 1), 1.0, Colors.warningRed);
         }
